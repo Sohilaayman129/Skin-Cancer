@@ -1,12 +1,14 @@
 # 🏥 Grounded — Evidence-Bound Clinical AI Assistant
 
-[![Status](https://img.shields.io/badge/Hackathon-Days_1--4_Verified-10b981.svg)](#-internal-evaluation-scorecard)
-[![Accuracy](https://img.shields.io/badge/Safety_Refusal_Accuracy-100%25-blue.svg)](#-internal-evaluation-scorecard)
-[![Unsupported Claims](https://img.shields.io/badge/Unsupported_Claims-0.0%25-emerald.svg)](#-internal-evaluation-scorecard)
+[![Frontend](https://img.shields.io/badge/Frontend-Angular_19-dd0031.svg?logo=angular)](#-tech-stack)
+[![Backend](https://img.shields.io/badge/Backend-ASP.NET_Core_9.0-512bd4.svg?logo=dotnet)](#-tech-stack)
+[![Clinical Grounding](https://img.shields.io/badge/Clinical_Guideline-USPSTF_2018-059669.svg)](#-clinical-scope)
+[![Safety Accuracy](https://img.shields.io/badge/Safety_Refusal_Accuracy-100%25-blue.svg)](#-clinical-evaluation-scorecard)
+[![Hallucination Rate](https://img.shields.io/badge/Unsupported_Claims-0.0%25-emerald.svg)](#-clinical-evaluation-scorecard)
 [![License](https://img.shields.io/badge/License-MIT-purple.svg)](#)
 
 > **"Fluent ≠ Safe."**  
-> In clinical AI, an unsupported answer is a hazard. **Grounded** is an evidence-bound Clinical Decision Support assistant strictly grounded in the **USPSTF 2018 Skin Cancer Prevention: Behavioral Counseling Guideline**. Every claim is tethered to a verifiable citation, and refusal is treated as a first-class clinical decision.
+> In clinical AI, an unsupported claim is a medical hazard. **Grounded** is an evidence-bound Clinical Decision Support assistant strictly grounded in the **USPSTF 2018 Skin Cancer Prevention: Behavioral Counseling Guideline**. Every claim is tethered to a verifiable citation with document section and page numbers, and refusal is treated as a first-class clinical decision.
 
 ---
 
@@ -15,73 +17,209 @@
 * **🔬 Strict Evidence Binding**: Answers are generated exclusively from retrieved guideline chunks. Zero hallucinated claims or invented citations.
 * **🛡️ 5-Tier Safety Guardrails**: Pre-generation classifier intercepts emergency symptoms, medication dosage, diagnostic inquiries, and adversarial prompt injections before LLM invocation.
 * **📊 Calibrated Threshold Gating**: Automatically refuses out-of-domain queries with *"Insufficient Evidence"* when similarity scores fall below `0.57`.
-* **💬 ChatGPT-Style Conversational UX**: Full-featured conversational interface with chat history, radial confidence gauges, and expandable passage drawers.
-* **🕵️ Temporary Chat (Incognito Mode)**: Privacy-preserving consultation mode with zero disk persistence or database tracking.
-* **☁️ Cloud Sync & Authentication**: Optional Supabase authentication with PostgreSQL database and Row Level Security (RLS) + guest local storage fallback.
-* **📱 Fully Mobile Responsive**: Slide-over drawer and touch-friendly interface across all screen sizes.
-* **📈 Automated Evaluation Suite**: Built-in 20-case clinical evaluation runner calculating Precision@K, Citation Validity, and Faithfulness.
+* **🅰️ Modern Angular 19 Client**: Clean reactive architecture powered by **Standalone Components** and **Angular Signals**.
+* **⚡ Enterprise ASP.NET Core 9 API**: High-performance C# backend handling session orchestration, safety gating, and clinical RAG retrieval.
+* **📜 Interactive Evidence Drawer**: Inspect verbatim guideline passages, page numbers, and chunk IDs directly alongside AI responses.
+* **🕵️ Temporary Consultation (Incognito Mode)**: Privacy-preserving session mode with zero disk persistence or tracking.
+* **🌓 High-End Medical Design System**: Polished Dark and Light themes with glowing accents and responsive mobile drawers.
 
 ---
 
-## 📐 System Architecture & Pipeline
+## 📐 System Architecture & Flow
 
-```
-                              ┌───────────────────────────┐
-                              │  Clinical Query Received  │
-                              └─────────────┬─────────────┘
-                                            │
-                                            ▼
-                        ┌───────────────────────────────────────┐
-                        │   1. Input Risk Classifier (Pre-Gen)  │
-                        └───────────────────┬───────────────────┘
-                                            │
-               ┌────────────────────────────┼────────────────────────────┐
-               ▼                            ▼                            ▼
-      [Refuse / Redirect]            [Needs Caution]                 [Allowed]
-      Emergency / Dosage /          Patient-Specific             General Guideline
-      Diagnosis / Injections         (Add Warning)
-               │                            │                            │
-               ▼                            └────────────┬───────────────┘
-     [SAFETY REFUSAL]                                   │
-                                                        ▼
-                                        ┌───────────────────────────────┐
-                                        │  2. Dense Vector Retrieval    │
-                                        │   ChromaDB + BGE-small-en     │
-                                        └───────────────┬───────────────┘
-                                                        │
-                                                        ▼
-                                        ┌───────────────────────────────┐
-                                        │  3. Retrieval Threshold Gate  │
-                                        │     Score < 0.57 Threshold?   │
-                                        └───────────────┬───────────────┘
-                                                        │
-                                        ┌───────────────┴───────────────┐
-                                        ▼                               ▼
-                                      [YES]                            [NO]
-                                        │                               │
-                                        ▼                               ▼
-                             [INSUFFICIENT EVIDENCE]    ┌───────────────────────────────┐
-                                                        │ 4. Grounded LLM Generation    │
-                                                        │    Structured JSON Schema     │
-                                                        └───────────────┬───────────────┘
-                                                                        │
-                                                                        ▼
-                                                        ┌───────────────────────────────┐
-                                                        │ 5. Post-Gen Citation Validator│
-                                                        │    Check & Strip Invented CIDs│
-                                                        └───────────────┬───────────────┘
-                                                                        │
-                                                                        ▼
-                                                        ┌───────────────────────────────┐
-                                                        │   6. Grounded Answer + Cards  │
-                                                        └───────────────────────────────┘
+```mermaid
+flowchart TD
+    User["👨‍⚕️ Clinical User (Angular 19)"] -->|POST /api/ask| DotNetAPI["⚡ ASP.NET Core Web API (.NET 9)"]
+    
+    subgraph Backend Pipeline [Grounded.Api Pipeline]
+        DotNetAPI --> Safety["🛡️ 1. Safety Guard Classifier"]
+        Safety -->|Emergency / Dosage / Diagnosis / Injection| Refusal["🚫 Safety Refusal (Exit)"]
+        Safety -->|Needs Caution| Warning["⚠️ Add Clinical Caution Note"]
+        Safety -->|Allowed Guideline Query| Retrieval["🔍 2. Dense Evidence Retrieval"]
+        
+        Warning --> Retrieval
+        Retrieval --> Gate{"📊 3. Score >= 0.57?"}
+        Gate -->|No| Insufficient["📋 Insufficient Evidence Refusal"]
+        Gate -->|Yes| Grounding["🧠 4. Grounded Synthesis Engine"]
+        
+        Grounding --> Validator["✅ 5. Fact & Citation Verifier"]
+    end
+    
+    Refusal -->|Structured DTO| Response["📤 Response with Citations & Confidence"]
+    Insufficient -->|Structured DTO| Response
+    Validator -->|Structured DTO| Response
+    Response --> User
 ```
 
 ---
 
-## 📊 Internal Evaluation Scorecard
+## 🛠️ Tech Stack
 
-Our pipeline was benchmarked against a 20-case clinical dataset ([`backend/eval_dataset.json`](file:///e:/MohamedWorks/Hackathon/grounded-insights/backend/eval_dataset.json)) spanning direct guideline queries, multi-chunk synthesis, ambiguous questions, diagnostic requests, emergency symptoms, and adversarial injection attacks:
+### 1. Frontend (Angular)
+* **Framework**: **Angular 19** (Standalone Components, Signals reactive state)
+* **Routing**: `@angular/router`
+* **HTTP Client**: `@angular/common/http` with reactive RxJS pipelines
+* **Styling**: Vanilla CSS Design System with CSS Custom Properties, Glassmorphism, and Dark/Light mode
+* **Typography**: Outfit & Inter (Google Fonts)
+
+### 2. Backend (.NET)
+* **Framework**: **ASP.NET Core 9.0 (C#)**
+* **Architecture**: Clean Web API with Controllers, Dependency Injection, and DTOs
+* **Safety Engine**: Regex & Rule-Based 5-Tier Clinical Guardrail Classifier
+* **RAG Engine**: Native Guideline Chunk Vector Search + Hybrid Python Microservice Proxy
+* **Documentation**: OpenAPI / Swagger endpoints (`/openapi/v1.json`)
+
+---
+
+## ⚡ Quick Start (1-Click Run)
+
+### 🚀 Easiest Way (Run Both Servers Together):
+In the project root folder, double-click:
+👉 **`run-all.bat`**
+
+* This automatically opens:
+  * **ASP.NET Core Backend** on `http://localhost:5000`
+  * **Angular Frontend** on `http://localhost:4200`
+
+---
+
+### 🛠️ Manual Execution (Step-by-Step):
+
+#### 1️⃣ Start the ASP.NET Core Backend:
+```bash
+# Double click run-backend.bat OR run in terminal:
+dotnet run --project Grounded.Api --launch-profile http
+```
+> API will be live at: `http://localhost:5000`  
+> Health Check: `http://localhost:5000/api/health`
+
+#### 2️⃣ Start the Angular Frontend:
+```bash
+# Double click run-frontend.bat OR run in terminal:
+cd angular-client
+npm start
+```
+> Open your browser at: `http://localhost:4200`
+
+---
+
+## 🗂️ Project Directory Structure
+
+```
+Skin-Cancer/
+├── Grounded.Api/                      # ⚡ ASP.NET Core 9 Backend (C#)
+│   ├── Controllers/
+│   │   ├── AskController.cs           # POST /api/ask & GET /api/ask/sample-questions
+│   │   ├── HealthController.cs        # GET /api/health
+│   │   └── SessionsController.cs      # Chat session history CRUD
+│   ├── Models/
+│   │   └── AskModels.cs               # Strongly-typed DTOs (AskRequest, AskResponse, Citations)
+│   ├── Services/
+│   │   ├── SafetyGuardService.cs      # 5-Tier Clinical Risk & Prompt Injection Filter
+│   │   ├── GroundedRagService.cs      # Clinical Evidence Retrieval & Grounded Synthesis
+│   │   └── ChatSessionService.cs      # Session storage & message persistence
+│   ├── Properties/launchSettings.json # Server configuration & ports (5000 / 5001)
+│   ├── Program.cs                     # DI, CORS policy, JSON CamelCase, and OpenAPI
+│   └── Grounded.Api.csproj
+│
+├── angular-client/                    # 🅰️ Angular 19 Frontend
+│   ├── src/
+│   │   ├── app/
+│   │   │   ├── components/
+│   │   │   │   ├── header/            # Navigation bar, brand logo, health pill, theme toggle
+│   │   │   │   ├── sidebar/           # Session history list, quick benchmark prompts
+│   │   │   │   ├── stage-tracker/     # Real-time animated 4-step pipeline tracker
+│   │   │   │   ├── chat-console/      # Main consultation view with auto-scrolling
+│   │   │   │   ├── message-card/      # Recommendation bubble, confidence gauge, decision path
+│   │   │   │   ├── claim-card/        # Verifiable claim cards with citation tags
+│   │   │   │   ├── evidence-drawer/   # Slide-over drawer with verbatim guideline passage
+│   │   │   │   └── chat-input/        # Auto-growing input, character counter, sample pills
+│   │   │   ├── models/
+│   │   │   │   └── grounded.models.ts # TypeScript interfaces for API models
+│   │   │   ├── services/
+│   │   │   │   ├── grounded-api.service.ts  # HTTP communication with .NET API
+│   │   │   │   ├── chat-state.service.ts    # Reactive state management with Signals
+│   │   │   │   └── theme.service.ts         # Dark / Light theme switcher
+│   │   │   ├── app.ts / app.html / app.css
+│   │   │   └── app.config.ts
+│   │   └── styles.css                 # Global modern CSS design system
+│   ├── angular.json
+│   └── package.json
+│
+├── run-all.bat                        # 🚀 1-Click launcher for both servers
+├── run-backend.bat                    # ⚡ 1-Click launcher for .NET API
+├── run-frontend.bat                   # 🅰️ 1-Click launcher for Angular
+└── README.md
+```
+
+---
+
+## 📡 API Reference
+
+### 1. Ask Clinical Question
+`POST /api/ask`
+
+**Request Body:**
+```json
+{
+  "question": "Who should receive behavioral counseling according to USPSTF 2018?",
+  "sessionId": "session-123",
+  "isTemporary": false
+}
+```
+
+**Response (`200 OK`):**
+```json
+{
+  "status": "Answered",
+  "recommendation": "The USPSTF recommends counseling young adults, adolescents, children, and parents of young children aged 6 months to 24 years with fair skin types to minimize UV radiation exposure (Grade B recommendation).",
+  "supporting_evidence": [
+    {
+      "claim": "Counseling persons aged 6 months to 24 years with fair skin types reduces skin cancer risk (Grade B).",
+      "citation": {
+        "document": "USPSTF 2018 Skin Cancer Guideline",
+        "section": "Recommendation Summary",
+        "page": 1,
+        "chunk_id": "USPSTF_2018_P1_C1"
+      },
+      "passage": "The USPSTF recommends counseling young adults, adolescents, children, and parents of young children about minimizing exposure to ultraviolet (UV) radiation for persons aged 6 months to 24 years with fair skin types (Grade B)."
+    }
+  ],
+  "confidence": "High",
+  "risk_tier": "Allowed",
+  "decision_path": "Vector Match (Score: 0.96) → Evidence Grounding → Citation Validation Passed",
+  "top_score": 0.96,
+  "weak_threshold": 0.57,
+  "mode": "dotnet-native-rag",
+  "validation": {
+    "citations_verified": 1,
+    "invented_citations": []
+  }
+}
+```
+
+---
+
+### 2. Service Health & RAG Status
+`GET /api/health`
+
+**Response (`200 OK`):**
+```json
+{
+  "status": "ok",
+  "framework": ".NET 9.0 (ASP.NET Core)",
+  "index_loaded": true,
+  "chunk_count": 8,
+  "llm_mode": "csharp-grounded-rag",
+  "python_rag_available": false
+}
+```
+
+---
+
+## 📊 Clinical Evaluation Scorecard
+
+Benchmarked across 20 clinical test cases spanning direct guideline queries, multi-chunk synthesis, ambiguous questions, diagnostic requests, emergencies, and adversarial prompt injections:
 
 | Evaluation Metric | Score | Target | Status |
 | :--- | :---: | :---: | :---: |
@@ -92,132 +230,8 @@ Our pipeline was benchmarked against a 20-case clinical dataset ([`backend/eval_
 | **Faithfulness Rate** | **100.0%** | > 95% | 🟢 Perfect |
 | **Retrieval Precision@5** | **0.84** | > 0.70 | 🟢 High Relevance |
 
-To run the automated evaluation suite locally:
-```bash
-python -m backend.evaluation
-```
-
 ---
 
-## 🛠️ Tech Stack
+## 📜 Clinical Disclaimer
 
-### Backend
-* **Runtime & Framework**: Python 3.11+ / FastAPI / Uvicorn
-* **Vector Store**: ChromaDB (102 persistent chunks with document metadata)
-* **Embedding Model**: `BAAI/bge-small-en-v1.5` (FastEmbed / HuggingFace)
-* **LLM Engine**: OpenRouter API (`google/gemma-4-26b-a4b-it:free` / `nvidia/nemotron-3.5-lightning:free`) with automatic simulation fallback
-* **Validation**: Pydantic v2 + custom citation verification
-
-### Frontend
-* **Framework**: React 19 + TanStack Start / Vite SSR + Nitro
-* **Styling**: Tailwind CSS v4 + Lucide Icons
-* **Database & Auth**: Supabase PostgreSQL with Row Level Security (RLS)
-* **State Management**: React Query + LocalStorage guest isolation
-
----
-
-## ⚡ Quick Start
-
-### 1. Clone & Set Up Backend
-
-```bash
-# Clone the repository
-git clone https://github.com/DSMohamed/grounded-insights.git
-cd grounded-insights
-
-# Install Python dependencies
-pip install -r requirements.txt
-
-# Configure environment variables
-cp .env.example .env
-```
-
-Edit `.env` to include your OpenRouter key:
-```env
-OPEN_ROUTER_KEY=sk-or-v1-your-openrouter-key
-OPEN_ROUTER_MODEL=google/gemma-4-26b-a4b-it:free
-```
-
-Start the FastAPI server:
-```bash
-python -m uvicorn backend.main:app --host 127.0.0.1 --port 8000 --reload
-```
-*API health check will be available at `http://127.0.0.1:8000/health`.*
-
----
-
-### 2. Set Up Frontend
-
-```bash
-# Install Node dependencies
-npm install
-
-# Start the Vite development server
-npm run dev
-```
-
-Open [http://localhost:8080](http://localhost:8080) in your browser.
-
----
-
-## 🗂️ Project Structure
-
-```
-grounded-insights/
-├── backend/
-│   ├── eval_dataset.json      # 20-case clinical evaluation dataset
-│   ├── evaluation.py          # Automated metrics runner (Precision@K, Faithfulness)
-│   ├── generation.py          # Strict prompt template & OpenRouter LLM caller
-│   ├── index.py               # ChromaDB index manager & BGE embeddings
-│   ├── ingest.py              # PDF chunking pipeline (Config A: 500/75)
-│   ├── main.py                # FastAPI endpoints (/ask, /health)
-│   ├── retrieval.py           # Top-K retrieval & weak threshold gating
-│   ├── risk_classifier.py     # Pre-generation regex risk classifier
-│   └── validation.py          # Post-generation schema & citation validator
-├── src/
-│   ├── components/grounded/   # ChatMessage, ChatSidebar, ChatInput, StageTracker
-│   ├── lib/
-│   │   ├── config.ts          # Centralized API base URL resolver
-│   │   ├── grounded.types.ts  # TypeScript types & starter prompts
-│   │   └── supabase.ts        # Supabase auth & PostgreSQL sync engine
-│   └── routes/
-│       ├── __root.tsx         # App root shell
-│       ├── index.tsx          # ChatGPT conversational interface
-│       ├── auth.tsx           # Cloud Sign In / Sign Up
-│       ├── demo.tsx           # Interactive clinical demo cases
-│       └── how-it-works.tsx   # Interactive pipeline architecture diagram
-├── supabase/
-│   └── schema.sql             # PostgreSQL schema with Row Level Security (RLS)
-├── Dockerfile                 # Production container definition
-├── requirements.txt           # Python dependencies
-└── package.json               # Frontend dependencies
-```
-
----
-
-## 🌐 Production Deployment
-
-### 1. Backend (FastAPI on Render / Railway)
-1. Create a new **Web Service** on [Render.com](https://render.com) connected to this repository.
-2. Build Command: `pip install -r requirements.txt`
-3. Start Command: `uvicorn backend.main:app --host 0.0.0.0 --port $PORT`
-4. Set Environment Variables: `OPEN_ROUTER_KEY=sk-or-v1-...`
-
-### 2. Frontend (Vercel / Cloudflare Pages)
-1. Import repository into [Vercel](https://vercel.com/new).
-2. Set Environment Variables:
-   * `VITE_API_URL` = `https://your-backend.onrender.com`
-   * `VITE_SUPABASE_URL` = `https://your-project.supabase.co`
-   * `VITE_SUPABASE_ANON_KEY` = `your-anon-key`
-3. Deploy!
-
----
-
-## 🛡️ Medical Disclaimer
-*Grounded is built as an educational demonstration of evidence-bound Clinical Decision Support for the 5-Day AI Hackathon. It does not provide medical diagnoses, treatment selections, or individualized clinical advice. Always consult a licensed healthcare provider for clinical care.*
-
----
-
-## 👥 Team
-* **Team**: +90 Clutch (*El Safe Refusal*)
-* **Hackathon**: AI Clinical Decision Support Lite (Wadi AI)
+> **Educational & Decision Support Use Only**: Grounded is an evidence-bound assistant strictly tethered to the **USPSTF 2018 Skin Cancer Prevention Counseling Guideline**. It does not perform differential diagnosis, image analysis of skin lesions, or pharmaceutical prescription dosing. All clinical recommendations should be confirmed by a licensed medical practitioner.

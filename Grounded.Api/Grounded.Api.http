@@ -1,0 +1,6 @@
+@Grounded.Api_HostAddress = http://localhost:5090
+
+GET {{Grounded.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

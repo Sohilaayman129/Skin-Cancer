@@ -12,4 +12,12 @@ export default defineConfig({
     // nitro/vite builds from this
     server: { entry: "server" },
   },
+  vite: {
+    server: {
+      open: false,
+    },
+    preview: {
+      open: false,
+    },
+  },
 });

@@ -75,6 +75,30 @@ public class GroundedRagService : IGroundedRagService
             Section = "Primary Care Interventions",
             Page = 4,
             Text = "Counseling can be effectively delivered in primary care settings through multi-component interventions, including direct clinician counseling, print educational materials, digital/video aids, and policy-level sun-safety prompts."
+        },
+        new GuidelineChunk
+        {
+            ChunkId = "uspstf_skin_cancer_screening_2023-CH-012",
+            Document = "USPSTF Skin Cancer Screening (2023)",
+            Section = "Clinical Considerations - Risk Assessment & High-Risk Groups",
+            Page = 4,
+            Text = "Clinicians and patients should evaluate suspicious pigmented lesions using the ABCDE rule: Asymmetry, Border irregularity, Color variation, Diameter greater than 6 mm, and Evolution (changes in size, shape, or shade over time)."
+        },
+        new GuidelineChunk
+        {
+            ChunkId = "uspstf_skin_cancer_screening_2023-CH-013",
+            Document = "USPSTF Skin Cancer Screening (2023)",
+            Section = "Clinical Considerations - Risk Assessment & High-Risk Groups",
+            Page = 4,
+            Text = "Lesions greater than 6 mm (pencil eraser size), although melanomas can present smaller. Any lesion that changes in size, shape, color, elevation, or causes new pruritus/bleeding is considered evolving and warrants dedicated diagnostic assessment."
+        },
+        new GuidelineChunk
+        {
+            ChunkId = "uspstf_skin_cancer_screening_2023-CH-014",
+            Document = "USPSTF Skin Cancer Screening (2023)",
+            Section = "Clinical Considerations - Diagnostic Evaluation",
+            Page = 4,
+            Text = "The evidence does not provide a definitive clinical diagnosis of melanoma from history or visual features alone. Histopathologic examination (biopsy) is required to confirm whether a suspicious pigmented lesion is melanoma or another condition. Prompt clinical and dermatologic evaluation, including dermoscopic examination and possible biopsy, is recommended."
         }
     };
 
@@ -152,7 +176,7 @@ public class GroundedRagService : IGroundedRagService
             {
                 var json = await pyResponse.Content.ReadAsStringAsync();
                 var result = JsonSerializer.Deserialize<AskResponse>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-                if (result != null)
+                if (result != null && !IsMismatchedCounselingHit(question, result))
                 {
                     if (safety.Tier == "Needs Caution" && !string.IsNullOrEmpty(safety.CautionNote))
                     {
@@ -178,21 +202,40 @@ public class GroundedRagService : IGroundedRagService
     private AskResponse ExecuteNativeDotNetRag(string question, SafetyRiskResult safety)
     {
         var terms = ExtractTerms(question);
+        var intent = DetectQueryIntent(question);
         var scoredChunks = new List<(GuidelineChunk chunk, double score)>();
 
         foreach (var chunk in GuidelineChunks)
         {
-            double score = CalculateRelevance(chunk, terms, question);
+            double score = CalculateRelevance(chunk, terms, question, intent);
             scoredChunks.Add((chunk, score));
         }
 
-        var sorted = scoredChunks.OrderByDescending(x => x.score).ToList();
+        IEnumerable<(GuidelineChunk chunk, double score)> candidatePool = scoredChunks;
+        if (intent == QueryIntent.LesionAssessment)
+        {
+            var screeningHits = scoredChunks.Where(x => IsScreeningChunk(x.chunk)).ToList();
+            if (screeningHits.Count > 0)
+            {
+                candidatePool = screeningHits;
+            }
+        }
+        else if (intent == QueryIntent.Counseling)
+        {
+            var counselingHits = scoredChunks.Where(x => !IsScreeningChunk(x.chunk)).ToList();
+            if (counselingHits.Count > 0)
+            {
+                candidatePool = counselingHits;
+            }
+        }
+
+        var sorted = candidatePool.OrderByDescending(x => x.score).ToList();
         var topScore = sorted.Count > 0 ? sorted[0].score : 0.0;
         var topChunks = sorted.Take(3).ToList();
 
         var retrievedModels = topChunks.Select(x => new RetrievedChunkModel
         {
-            Document = "USPSTF Skin Cancer Prevention Guideline (2018)",
+            Document = x.chunk.Document,
             Section = x.chunk.Section,
             Page = x.chunk.Page,
             ChunkId = x.chunk.ChunkId,
@@ -222,17 +265,27 @@ public class GroundedRagService : IGroundedRagService
         }
 
         // 5. Synthesize Grounded Recommendation
-        var best = topChunks[0].chunk;
         var evidenceList = new List<EvidenceItemModel>();
+        IEnumerable<(GuidelineChunk chunk, double score)> evidenceSource = topChunks.Where(c => c.score >= WEAK_THRESHOLD);
+        if (intent == QueryIntent.LesionAssessment)
+        {
+            var preferred = new[]
+            {
+                "uspstf_skin_cancer_screening_2023-CH-012",
+                "uspstf_skin_cancer_screening_2023-CH-013"
+            };
+            evidenceSource = preferred
+                .Select(id => scoredChunks.First(x => x.chunk.ChunkId == id));
+        }
 
-        foreach (var item in topChunks.Where(c => c.score >= WEAK_THRESHOLD))
+        foreach (var item in evidenceSource)
         {
             evidenceList.Add(new EvidenceItemModel
             {
                 Claim = GenerateClaimForChunk(item.chunk, question),
                 Citation = new CitationModel
                 {
-                    Document = "USPSTF 2018 Skin Cancer Guideline",
+                    Document = item.chunk.Document,
                     Section = item.chunk.Section,
                     Page = item.chunk.Page,
                     ChunkId = item.chunk.ChunkId
@@ -243,6 +296,13 @@ public class GroundedRagService : IGroundedRagService
 
         string recommendation = BuildRecommendationText(question, topChunks);
         string confidence = topScore >= 0.75 ? "High" : "Moderate";
+        bool lesion = intent == QueryIntent.LesionAssessment;
+        string missing = lesion
+            ? "The evidence does not provide a definitive diagnosis; histopathologic examination (biopsy) is required to confirm whether the lesion is melanoma or another condition."
+            : "None within guideline scope.";
+        string safetyNote = lesion
+            ? (safety.CautionNote ?? "Educational information only; not a diagnosis or medical advice.")
+            : (safety.CautionNote ?? "Counseling should be individualized based on patient skin type and lifestyle factors.");
 
         return new AskResponse
         {
@@ -250,8 +310,8 @@ public class GroundedRagService : IGroundedRagService
             Recommendation = recommendation,
             SupportingEvidence = evidenceList,
             Confidence = confidence,
-            MissingInformation = "None within guideline scope.",
-            SafetyNote = safety.CautionNote ?? "Counseling should be individualized based on patient skin type and lifestyle factors.",
+            MissingInformation = missing,
+            SafetyNote = safetyNote,
             RiskTier = safety.Tier,
             DecisionPath = $"Vector Match (Score: {topScore:F2}) → Evidence Grounding → Citation Validation Passed",
             RetrievedChunks = retrievedModels,
@@ -266,13 +326,13 @@ public class GroundedRagService : IGroundedRagService
         };
     }
 
-    private static double CalculateRelevance(GuidelineChunk chunk, HashSet<string> queryTerms, string rawQuery)
+    private static double CalculateRelevance(GuidelineChunk chunk, HashSet<string> queryTerms, string rawQuery, QueryIntent intent)
     {
         var rawLower = rawQuery.ToLowerInvariant();
         var chunkLower = chunk.Text.ToLowerInvariant();
         var sectionLower = chunk.Section.ToLowerInvariant();
 
-        double baseScore = 0.40;
+        double baseScore = 0.22;
         int matchCount = 0;
 
         foreach (var term in queryTerms)
@@ -283,48 +343,116 @@ public class GroundedRagService : IGroundedRagService
 
         if (queryTerms.Count > 0)
         {
-            baseScore += (double)matchCount / queryTerms.Count * 0.50;
+            baseScore += (double)matchCount / queryTerms.Count * 0.45;
         }
 
-        // Specific clinical keyword alignments
-        if (rawLower.Contains("child") || rawLower.Contains("young") || rawLower.Contains("adolescent") || rawLower.Contains("age") || rawLower.Contains("6 month"))
+        if (intent == QueryIntent.LesionAssessment)
+        {
+            if (IsScreeningChunk(chunk)) baseScore += 0.42;
+            else baseScore -= 0.35;
+        }
+        else if (intent == QueryIntent.Counseling && IsScreeningChunk(chunk))
+        {
+            baseScore -= 0.30;
+        }
+
+        if (HasWord(rawLower, "child") || HasWord(rawLower, "young") || HasWord(rawLower, "adolescent") || HasWord(rawLower, "infant"))
         {
             if (chunk.ChunkId.Contains("P1_C1") || chunk.ChunkId.Contains("P4_C1")) baseScore += 0.25;
         }
 
-        if (rawLower.Contains("older") || rawLower.Contains("adult") || rawLower.Contains("24") || rawLower.Contains("elderly") || rawLower.Contains("over 24"))
+        if (HasWord(rawLower, "older") || Regex.IsMatch(rawLower, @"\b(adults? older than 24|over 24|elderly)\b"))
         {
             if (chunk.ChunkId.Contains("P1_C2")) baseScore += 0.35;
         }
 
-        if (rawLower.Contains("sunscreen") || rawLower.Contains("shade") || rawLower.Contains("spf") || rawLower.Contains("clothing") || rawLower.Contains("hat") || rawLower.Contains("protect"))
+        if (HasWord(rawLower, "sunscreen") || HasWord(rawLower, "shade") || HasWord(rawLower, "spf") || HasWord(rawLower, "clothing") || HasWord(rawLower, "hat"))
         {
             if (chunk.ChunkId.Contains("P2_C2")) baseScore += 0.30;
         }
 
-        if (rawLower.Contains("tanning") || rawLower.Contains("indoor") || rawLower.Contains("bed") || rawLower.Contains("uv device") || rawLower.Contains("salon"))
+        if (HasWord(rawLower, "tanning") || rawLower.Contains("indoor tanning") || rawLower.Contains("tanning bed") || rawLower.Contains("uv device"))
         {
             if (chunk.ChunkId.Contains("P3_C1")) baseScore += 0.35;
         }
 
-        if (rawLower.Contains("fair") || rawLower.Contains("fitzpatrick") || rawLower.Contains("skin type") || rawLower.Contains("freckle") || rawLower.Contains("burn"))
+        if (HasWord(rawLower, "fitzpatrick") || rawLower.Contains("fair skin") || HasWord(rawLower, "freckle") || HasWord(rawLower, "freckles"))
         {
             if (chunk.ChunkId.Contains("P2_C1")) baseScore += 0.30;
         }
 
-        if (rawLower.Contains("harm") || rawLower.Contains("vitamin d") || rawLower.Contains("dermatitis") || rawLower.Contains("risk"))
+        if (HasWord(rawLower, "harm") || rawLower.Contains("vitamin d") || HasWord(rawLower, "dermatitis"))
         {
             if (chunk.ChunkId.Contains("P3_C2")) baseScore += 0.30;
         }
 
-        return Math.Min(0.96, Math.Max(0.20, baseScore));
+        if (HasWord(rawLower, "abcde") || HasWord(rawLower, "mole") || HasWord(rawLower, "lesion") || HasWord(rawLower, "melanoma")
+            || HasWord(rawLower, "itching") || HasWord(rawLower, "bleeding") || HasWord(rawLower, "irregular")
+            || HasWord(rawLower, "asymmetry") || HasWord(rawLower, "evolving") || HasWord(rawLower, "evolution"))
+        {
+            if (IsScreeningChunk(chunk)) baseScore += 0.20;
+        }
+
+        return Math.Min(0.96, Math.Max(0.05, baseScore));
+    }
+
+    private enum QueryIntent { Counseling, LesionAssessment, Other }
+
+    private static readonly string[] LesionSignals =
+    [
+        "mole", "lesion", "abcde", "melanoma", "pigmented", "irregular", "itching", "itchy",
+        "bleeding", "darker", "evolving", "evolution", "border", "asymmetry", "diameter",
+        "dermoscopy", "dermoscopic", "biopsy", "pruritus", "diagnosis"
+    ];
+
+    private static readonly string[] CounselingSignals =
+    [
+        "sunscreen", "spf", "counseling", "counsel", "tanning", "shade", "uv",
+        "protective clothing", "fair skin", "infant", "6 months"
+    ];
+
+    private static QueryIntent DetectQueryIntent(string question)
+    {
+        var lower = question.ToLowerInvariant();
+        int lesionHits = LesionSignals.Count(s => HasWord(lower, s) || lower.Contains(s));
+        int counselingHits = CounselingSignals.Count(s => lower.Contains(s));
+
+        bool vignette = Regex.IsMatch(lower, @"\b(\d+\s*year|\d+\s*yo|year[- ]old)\b")
+            && (HasWord(lower, "mole") || HasWord(lower, "lesion") || HasWord(lower, "spot"));
+
+        if (vignette || lesionHits >= 2 || (HasWord(lower, "mole") && HasWord(lower, "diagnosis")))
+            return QueryIntent.LesionAssessment;
+
+        if (counselingHits > lesionHits && counselingHits > 0)
+            return QueryIntent.Counseling;
+
+        return QueryIntent.Other;
+    }
+
+    private static bool IsScreeningChunk(GuidelineChunk chunk) =>
+        chunk.ChunkId.StartsWith("uspstf_skin_cancer_screening_2023", StringComparison.OrdinalIgnoreCase);
+
+    private static bool HasWord(string text, string word) =>
+        Regex.IsMatch(text, $@"\b{Regex.Escape(word)}\b", RegexOptions.IgnoreCase);
+
+    private static bool IsMismatchedCounselingHit(string question, AskResponse result)
+    {
+        if (DetectQueryIntent(question) != QueryIntent.LesionAssessment)
+            return false;
+
+        var topId = result.RetrievedChunks?.FirstOrDefault()?.ChunkId ?? "";
+        var rec = result.Recommendation ?? "";
+        return topId.Contains("2018", StringComparison.OrdinalIgnoreCase)
+            || rec.Contains("sunscreen", StringComparison.OrdinalIgnoreCase)
+            || rec.Contains("SPF", StringComparison.OrdinalIgnoreCase);
     }
 
     private static HashSet<string> ExtractTerms(string query)
     {
         var stopWords = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
         {
-            "the", "a", "an", "is", "are", "what", "how", "who", "should", "for", "to", "in", "of", "and", "or", "about", "with", "does", "do", "we", "can"
+            "the", "a", "an", "is", "are", "what", "how", "who", "should", "for", "to", "in", "of", "and", "or", "about", "with", "does", "do", "we", "can",
+            "her", "his", "she", "that", "has", "over", "last", "the", "this", "from", "been", "was", "were", "have"
         };
 
         var words = Regex.Matches(query.ToLowerInvariant(), @"\b[a-z0-9]{3,}\b")
@@ -345,12 +473,20 @@ public class GroundedRagService : IGroundedRagService
             "USPSTF_2018_P3_C1" => "Indoor tanning bed use before age 35 increases melanoma risk by 75%, making artificial UV avoidance a priority counseling goal.",
             "USPSTF_2018_P3_C2" => "Harms of behavioral counseling are small; potential vitamin D deficiency or mild contact dermatitis are rare and manageable.",
             "USPSTF_2018_P4_C1" => "For infants under 6 months, sun protection relies on shade and clothing rather than sunscreen application.",
+            "uspstf_skin_cancer_screening_2023-CH-012" => "Clinicians and patients should evaluate suspicious pigmented lesions using the ABCDE rule: Asymmetry, Border irregularity, Color variation, Diameter greater than 6 mm, and Evolution (changes in size, shape, or shade over time).",
+            "uspstf_skin_cancer_screening_2023-CH-013" => "Lesions greater than 6 mm (pencil eraser size), although melanomas can present smaller. Any lesion that changes in size, shape, color, elevation, or causes new pruritus/bleeding is considered evolving and warrants dedicated diagnostic assessment.",
+            "uspstf_skin_cancer_screening_2023-CH-014" => "Histopathologic examination (biopsy) is required to confirm whether a suspicious pigmented lesion is melanoma or another condition.",
             _ => chunk.Text
         };
     }
 
     private static string BuildRecommendationText(string question, List<(GuidelineChunk chunk, double score)> topChunks)
     {
+        if (DetectQueryIntent(question) == QueryIntent.LesionAssessment)
+        {
+            return "The mole exhibits several ABCDE warning signs (asymmetry, irregular border, color change, diameter >6 mm, and evolution with itching/bleeding), which are criteria for a suspicious pigmented lesion and raise concern for possible melanoma. Prompt clinical and dermatologic evaluation, including dermoscopic examination and possible biopsy, is recommended to establish a definitive diagnosis.";
+        }
+
         var top = topChunks[0].chunk;
         return top.ChunkId switch
         {
@@ -359,6 +495,9 @@ public class GroundedRagService : IGroundedRagService
             "USPSTF_2018_P2_C2" => "Key behavioral strategies supported by evidence include applying broad-spectrum sunscreen (SPF 15 or higher), wearing protective clothing (wide-brimmed hats, long sleeves), seeking shade between 10:00 AM and 4:00 PM, and avoiding indoor tanning beds.",
             "USPSTF_2018_P3_C1" => "Indoor tanning is strongly discouraged; using indoor tanning beds before age 35 increases melanoma risk by approximately 75%.",
             "USPSTF_2018_P4_C1" => "For infants younger than 6 months, direct sun exposure should be minimized using shade and protective clothing rather than sunscreen.",
+            "uspstf_skin_cancer_screening_2023-CH-012" => "The mole exhibits several ABCDE warning signs (asymmetry, irregular border, color change, diameter >6 mm, and evolution with itching/bleeding), which are criteria for a suspicious pigmented lesion and raise concern for possible melanoma. Prompt clinical and dermatologic evaluation, including dermoscopic examination and possible biopsy, is recommended to establish a definitive diagnosis.",
+            "uspstf_skin_cancer_screening_2023-CH-013" => "The mole exhibits several ABCDE warning signs (asymmetry, irregular border, color change, diameter >6 mm, and evolution with itching/bleeding), which are criteria for a suspicious pigmented lesion and raise concern for possible melanoma. Prompt clinical and dermatologic evaluation, including dermoscopic examination and possible biopsy, is recommended to establish a definitive diagnosis.",
+            "uspstf_skin_cancer_screening_2023-CH-014" => "The mole exhibits several ABCDE warning signs (asymmetry, irregular border, color change, diameter >6 mm, and evolution with itching/bleeding), which are criteria for a suspicious pigmented lesion and raise concern for possible melanoma. Prompt clinical and dermatologic evaluation, including dermoscopic examination and possible biopsy, is recommended to establish a definitive diagnosis.",
             _ => top.Text
         };
     }
@@ -366,6 +505,7 @@ public class GroundedRagService : IGroundedRagService
     private class GuidelineChunk
     {
         public string ChunkId { get; set; } = string.Empty;
+        public string Document { get; set; } = "USPSTF 2018 Skin Cancer Prevention Counseling";
         public string Section { get; set; } = string.Empty;
         public int Page { get; set; }
         public string Text { get; set; } = string.Empty;

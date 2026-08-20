@@ -32,3 +32,13 @@ D:\AI Hackathon\Skin-Cancer\Grounded.Api\obj\Debug\net9.0\refint\Grounded.Api.dl
 D:\AI Hackathon\Skin-Cancer\Grounded.Api\obj\Debug\net9.0\Grounded.Api.pdb
 D:\AI Hackathon\Skin-Cancer\Grounded.Api\obj\Debug\net9.0\Grounded.Api.genruntimeconfig.cache
 D:\AI Hackathon\Skin-Cancer\Grounded.Api\obj\Debug\net9.0\ref\Grounded.Api.dll
+d:\AI Hackathon\Skin-Cancer\Grounded.Api\obj\verify-build\appsettings.Development.json
+d:\AI Hackathon\Skin-Cancer\Grounded.Api\obj\verify-build\appsettings.json
+d:\AI Hackathon\Skin-Cancer\Grounded.Api\obj\verify-build\Grounded.Api.staticwebassets.endpoints.json
+d:\AI Hackathon\Skin-Cancer\Grounded.Api\obj\verify-build\Grounded.Api.exe
+d:\AI Hackathon\Skin-Cancer\Grounded.Api\obj\verify-build\Grounded.Api.deps.json
+d:\AI Hackathon\Skin-Cancer\Grounded.Api\obj\verify-build\Grounded.Api.runtimeconfig.json
+d:\AI Hackathon\Skin-Cancer\Grounded.Api\obj\verify-build\Grounded.Api.dll
+d:\AI Hackathon\Skin-Cancer\Grounded.Api\obj\verify-build\Grounded.Api.pdb
+d:\AI Hackathon\Skin-Cancer\Grounded.Api\obj\verify-build\Microsoft.AspNetCore.OpenApi.dll
+d:\AI Hackathon\Skin-Cancer\Grounded.Api\obj\verify-build\Microsoft.OpenApi.dll

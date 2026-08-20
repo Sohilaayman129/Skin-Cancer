@@ -81,11 +81,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\AI Hackathon\\Skin-Cancer\\Grounded.Api\\Grounded.Api.csproj",
+      "projectUniqueName": "d:\\AI Hackathon\\Skin-Cancer\\Grounded.Api\\Grounded.Api.csproj",
       "projectName": "Grounded.Api",
-      "projectPath": "D:\\AI Hackathon\\Skin-Cancer\\Grounded.Api\\Grounded.Api.csproj",
+      "projectPath": "d:\\AI Hackathon\\Skin-Cancer\\Grounded.Api\\Grounded.Api.csproj",
       "packagesPath": "C:\\Users\\hp\\.nuget\\packages\\",
-      "outputPath": "D:\\AI Hackathon\\Skin-Cancer\\Grounded.Api\\obj\\",
+      "outputPath": "d:\\AI Hackathon\\Skin-Cancer\\Grounded.Api\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

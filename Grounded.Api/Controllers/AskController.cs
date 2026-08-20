@@ -50,6 +50,7 @@ public class AskController : ControllerBase
     {
         var samples = new[]
         {
+            new { Category = "Suspicious Lesion", Text = "A 42 year old female complains about a mole on her hand that has changed over the last 4 months — grown, turned darker, irregular edges, itching and bleeding. What is the diagnosis?", Tag = "ABCDE" },
             new { Category = "Guideline Scope", Text = "Who should receive behavioral counseling according to USPSTF 2018?", Tag = "Grade B" },
             new { Category = "Adult Evidence", Text = "What is the USPSTF recommendation for adults older than 24 years?", Tag = "Grade I" },
             new { Category = "Intervention Strategies", Text = "What are the most effective sun-protection behavioral interventions?", Tag = "Practice" },

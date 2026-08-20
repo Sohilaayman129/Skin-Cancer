@@ -13,7 +13,7 @@ from langchain_community.vectorstores import Chroma
 from .ingest import load_and_chunk
 
 PERSIST_DIR = Path(__file__).resolve().parent.parent / "chroma_index"
-COLLECTION_NAME = "cfg_a"
+COLLECTION_NAME = "cfg_screening_v2"
 
 _vectorstore: Chroma | None = None
 

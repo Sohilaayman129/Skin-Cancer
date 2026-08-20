@@ -9,7 +9,7 @@
     "build:backend": "dotnet build Grounded.Api",
     "build:frontend": "npm --prefix angular-client run build",
     "build:all": "dotnet build Grounded.Api && npm --prefix angular-client run build",
-    "dev": "vite dev",
+    "dev": "vite dev --open false",
     "build": "vite build",
     "build:dev": "vite build --mode development",
     "preview": "vite preview",

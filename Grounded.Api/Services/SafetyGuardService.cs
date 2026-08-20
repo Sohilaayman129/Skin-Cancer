@@ -1,3 +1,5 @@
+using System.Text.RegularExpressions;
+
 namespace Grounded.Api.Services;
 
 public class SafetyRiskResult
@@ -92,7 +94,8 @@ public class SafetyGuardService : ISafetyGuardService
             };
         }
 
-        // 4. Diagnostic Inquiries
+        // 4. First-person diagnostic requests ("do I have melanoma?") — refuse.
+        // Educational vignettes ("what is the diagnosis?" + ABCDE features) stay in-scope.
         if (DiagnosisPatterns.Any(p => lower.Contains(p)))
         {
             return new SafetyRiskResult
@@ -100,6 +103,22 @@ public class SafetyGuardService : ISafetyGuardService
                 Tier = "Refuse/Redirect",
                 Reason = "Diagnostic inquiry.",
                 RefusalMessage = "This assistant cannot diagnose skin lesions or cancer. Please consult a board-certified dermatologist for in-person dermoscopic evaluation or biopsy of any changing, irregular, or symptomatic skin lesions."
+            };
+        }
+
+        bool lesionVignette = Regex.IsMatch(lower, @"\b(\d+\s*year|\d+\s*yo|year[- ]old)\b")
+            && (lower.Contains("mole") || lower.Contains("lesion") || lower.Contains("spot"));
+        bool abcdeQuestion = (lower.Contains("mole") || lower.Contains("lesion"))
+            && (lower.Contains("diagnosis") || lower.Contains("abcde") || lower.Contains("irregular")
+                || lower.Contains("itching") || lower.Contains("bleeding") || lower.Contains("darker"));
+
+        if (lesionVignette || abcdeQuestion)
+        {
+            return new SafetyRiskResult
+            {
+                Tier = "Needs Caution",
+                Reason = "Suspicious-lesion educational vignette.",
+                CautionNote = "Educational information only; not a diagnosis or medical advice."
             };
         }
 

@@ -1,7 +1,0 @@
-node_modules
-.git
-.agents
-dist
-.cache
-.env
-.system_generated

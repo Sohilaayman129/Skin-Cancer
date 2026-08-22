@@ -1,0 +1,42 @@
+TOXICOLOGICAL PROFILE FOR HYDROGEN SULFIDE AND CARBONYL SULFIDE
+Agency for Toxic Substances and Disease Registry (ATSDR), Public Health Service, U.S. Department of Health and Human Services (November 2016)
+
+=== SECTION: Public Health Statement — Hydrogen Sulfide ===
+Page: 1
+Document: ATSDR Toxicological Profile for Hydrogen Sulfide and Carbonyl Sulfide (2016)
+Hydrogen sulfide (H2S) is a flammable, colorless gas with a characteristic odor of rotten eggs. People usually can smell hydrogen sulfide at low concentrations in air, ranging from 0.0005 to 0.3 parts hydrogen sulfide per million parts of air (ppm). At high concentrations (>=100 ppm), individuals lose the ability to smell it due to rapid olfactory paralysis, which dangerously increases exposure risk.
+
+=== SECTION: Environmental & Occupational Sources ===
+Page: 1
+Document: ATSDR Toxicological Profile for Hydrogen Sulfide and Carbonyl Sulfide (2016)
+Hydrogen sulfide occurs both naturally and from anthropogenic processes. Natural sources include volcanic gases, sulfur springs, undersea vents, swamps, and stagnant bodies of water. Major industrial sources include municipal sewers, wastewater treatment plants, liquid manure storage pits and swine confinement facilities, petroleum refineries, natural gas plants, pulp and paper mills (kraft process), tanneries, and coke oven operations.
+
+=== SECTION: Health Effects — Respiratory Toxicity ===
+Page: 17
+Document: ATSDR Toxicological Profile for Hydrogen Sulfide and Carbonyl Sulfide (2016)
+The respiratory tract is one of the most sensitive targets of hydrogen sulfide toxicity. Exposure to very high concentrations (>500 ppm) causes rapid respiratory arrest and noncardiogenic pulmonary edema secondary to disruption of the brainstem respiratory drive and inhibition of cytochrome c oxidase in lung mitochondria. At low levels (2 to 10 ppm), hydrogen sulfide acts as a mucous membrane irritant causing sore throat, coughing, nasal symptoms, and bronchial obstruction in sensitive individuals with asthma.
+
+=== SECTION: Health Effects — Neurological Toxicity & Knockdown ===
+Page: 74
+Document: ATSDR Toxicological Profile for Hydrogen Sulfide and Carbonyl Sulfide (2016)
+Acute exposure to high concentrations of hydrogen sulfide triggers rapid loss of consciousness ('knockdown' or slaughterhouse sledgehammer effect). Persistent long-term neurological sequelae in survivors include chronic headaches, impaired memory, poor concentration, vertigo, ataxia, cognitive deficits, and motor dysfunction. Subclinical neurobehavioral alterations (slow reaction time, impaired balance sway) occur with chronic lower-level exposures.
+
+=== SECTION: Minimal Risk Levels (MRLs) — Hydrogen Sulfide ===
+Page: 20
+Document: ATSDR Toxicological Profile for Hydrogen Sulfide and Carbonyl Sulfide (2016)
+ATSDR established an Acute-Duration Inhalation MRL of 0.07 ppm for hydrogen sulfide based on bronchial obstruction in asthmatic subjects exposed to 2 ppm for 30 minutes (Jappinen et al. 1990) with an uncertainty factor of 27. The Intermediate-Duration Inhalation MRL is 0.02 ppm based on a NOAEL of 10 ppm and LOAEL of 30 ppm for olfactory neuron loss and basal cell hyperplasia in the nasal cavity of rats (Brenneman et al. 2000) with an uncertainty factor of 30.
+
+=== SECTION: Regulations & Exposure Limits ===
+Page: 210
+Document: ATSDR Toxicological Profile for Hydrogen Sulfide and Carbonyl Sulfide (2016)
+Federal safety standards for hydrogen sulfide include: OSHA acceptable ceiling concentration of 20 ppm (with an allowable peak of 50 ppm for 10 minutes once per 8-hour shift); NIOSH recommended exposure limit (REL) ceiling of 10 ppm (10-minute ceiling) and IDLH (Immediately Dangerous to Life or Health) threshold of 100 ppm; ACGIH TLV 8-hour TWA is 1 ppm with a STEL of 5 ppm.
+
+=== SECTION: Public Health Statement — Carbonyl Sulfide ===
+Page: 7
+Document: ATSDR Toxicological Profile for Hydrogen Sulfide and Carbonyl Sulfide (2016)
+Carbonyl sulfide (COS), also known as carbon oxysulfide, is a colorless gas with a typical rotten-egg sulfide odor when impure (odor threshold 0.055 ppm / 135 ug/m3). It is the most abundant sulfur-containing gas in the troposphere with an atmospheric lifetime of 2 to 10 years. It is used as a chemical intermediate in thiocarbamate herbicide manufacturing and as an agricultural grain fumigant alternative to methyl bromide.
+
+=== SECTION: Toxicokinetics & Clinical Management ===
+Page: 121
+Document: ATSDR Toxicological Profile for Hydrogen Sulfide and Carbonyl Sulfide (2016)
+Hydrogen sulfide is primarily absorbed via inhalation and detoxified by liver oxidation to sulfate and thiosulfate, which are excreted in urine. Urinary thiosulfate serves as a key biomarker of exposure. Clinical management consists of immediate removal from exposure, 100% high-flow oxygen, supportive airway management, and hyperbaric oxygen or sodium nitrite therapy in severe acute poisonings.

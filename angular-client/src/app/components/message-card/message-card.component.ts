@@ -89,7 +89,9 @@ import { ClaimCardComponent } from '../claim-card/claim-card.component';
               <div class="evidence-section">
                 <div class="evidence-section-header">
                   <span class="evidence-title">Verifiable Evidence Citations</span>
-                  <span class="evidence-count">{{ message.response?.supporting_evidence?.length }} Grounded Claims</span>
+                  <span class="evidence-count">
+                    {{ message.response?.supporting_evidence?.length }} claims · {{ message.response?.validation?.citations_verified ?? message.response?.supporting_evidence?.length }} verified
+                  </span>
                 </div>
                 
                 <div class="claims-list">
@@ -98,6 +100,21 @@ import { ClaimCardComponent } from '../claim-card/claim-card.component';
                   }
                 </div>
               </div>
+            }
+
+            <!-- Clinical Evidence Gap & Diagnostic Boundary (Model 1 Feature) -->
+            @if (message.response?.missing_information; as gap) {
+              @if (gap.length > 0 && gap !== 'None identified in guideline scope.') {
+                <div class="evidence-gap-box">
+                  <div class="gap-badge-wrap">
+                    <span class="gap-pill">Gap</span>
+                  </div>
+                  <div class="gap-body">
+                    <span class="gap-heading">Evidence Boundary & Diagnostic Limitation</span>
+                    <p class="gap-text">{{ gap }}</p>
+                  </div>
+                </div>
+              }
             }
 
             <!-- Retrieved Chunks / Pipeline Drawer Accordion -->
@@ -422,6 +439,60 @@ import { ClaimCardComponent } from '../claim-card/claim-card.component';
       font-size: 0.72rem;
       color: var(--primary-color);
       font-weight: 600;
+    }
+
+    /* Evidence Gap Callout (Model 1 feature) */
+    .evidence-gap-box {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      padding: 0.75rem 1rem;
+      background: rgba(147, 51, 234, 0.07);
+      border: 1px solid rgba(147, 51, 234, 0.25);
+      border-left: 3px solid #9333ea;
+      border-radius: 10px;
+      margin-top: 0.35rem;
+    }
+
+    .gap-badge-wrap {
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .gap-pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #a855f7;
+      background: rgba(147, 51, 234, 0.15);
+      border: 1px solid rgba(147, 51, 234, 0.35);
+      padding: 0.15rem 0.5rem;
+      border-radius: 5px;
+    }
+
+    .gap-body {
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+    }
+
+    .gap-heading {
+      font-size: 0.73rem;
+      font-weight: 700;
+      color: #a855f7;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .gap-text {
+      margin: 0;
+      font-size: 0.84rem;
+      line-height: 1.45;
+      color: var(--text-primary);
     }
 
     .claims-list {

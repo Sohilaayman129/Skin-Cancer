@@ -11,11 +11,13 @@ echo Stopping any previous Grounded.Api process...
 taskkill /F /IM Grounded.Api.exe >nul 2>&1
 timeout /t 2 /nobreak >nul
 
+set "PATH=%PATH%;C:\Program Files\nodejs;C:\Users\hp\AppData\Roaming\npm"
+
 start "Grounded - Backend (.NET)" cmd /k "cd /d %~dp0Grounded.Api && echo [BACKEND] Starting ASP.NET Core API... && dotnet run --launch-profile http"
 
 timeout /t 3 /nobreak >nul
 
-start "Grounded - Frontend (Angular)" cmd /k "set BROWSER=none&& set PATH=C:\Program Files\nodejs;C:\Users\hp\AppData\Roaming\npm;%%PATH%% && cd /d %~dp0angular-client && echo [FRONTEND] Starting Angular Client... && call npm.cmd start -- --open=false"
+start "Grounded - Frontend (Angular)" cmd /k "set BROWSER=none&& set PATH=%PATH%;C:\Program Files\nodejs;C:\Users\hp\AppData\Roaming\npm && cd /d %~dp0angular-client && echo [FRONTEND] Starting Angular Client... && npm start"
 
 echo.
 echo Both servers are starting in separate windows.

@@ -90,6 +90,7 @@ def load_and_chunk(pdf_path: Path | None = None) -> list[Document]:
         print(f"[ingest] Counseling PDF not found at {path}; indexing screening passages only.")
 
     chunks.extend(screening_documents())
+    chunks.extend(toxicology_documents())
     return chunks
 
 
@@ -146,6 +147,111 @@ def screening_documents() -> list[Document]:
                     "section": item["section"],
                     "chunk_id": item["chunk_id"],
                     "source_url": SOURCE_URL,
+                },
+            )
+        )
+    return docs
+
+
+ATSDR_DOC_ID = "atsdr_h2s_cos_2016"
+ATSDR_DOC_NAME = "ATSDR Toxicological Profile for Hydrogen Sulfide and Carbonyl Sulfide (2016)"
+ATSDR_SOURCE_URL = "https://www.atsdr.cdc.gov/ToxProfiles/tp114.pdf"
+
+ATSDR_CHUNKS = [
+    {
+        "chunk_id": f"{ATSDR_DOC_ID}-CH-001",
+        "page": 1,
+        "section": "Public Health Statement — Chemical Identity & Odor Threshold",
+        "text": (
+            "Hydrogen sulfide (H2S) is a flammable, colorless gas with a characteristic rotten egg odor. "
+            "The odor threshold in air ranges from 0.0005 to 0.3 ppm. At high concentrations (>=100 ppm), "
+            "rapid olfactory fatigue or paralysis occurs, preventing smell detection and causing extreme risk."
+        ),
+    },
+    {
+        "chunk_id": f"{ATSDR_DOC_ID}-CH-002",
+        "page": 1,
+        "section": "Public Health Statement — Environmental & Industrial Sources",
+        "text": (
+            "Hydrogen sulfide occurs naturally in volcanic gases, sulfur springs, undersea vents, and swamps. "
+            "Industrial sources include wastewater treatment plants, municipal sewers, manure storage pits, "
+            "petroleum refineries, natural gas processing, pulp and paper kraft mills, and tanneries."
+        ),
+    },
+    {
+        "chunk_id": f"{ATSDR_DOC_ID}-CH-003",
+        "page": 17,
+        "section": "Health Effects — Respiratory Toxicity & Mechanism",
+        "text": (
+            "The respiratory tract is a primary target. Inhalation of high levels (>500 ppm) causes rapid respiratory "
+            "arrest and noncardiogenic pulmonary edema by inhibiting mitochondrial cytochrome c oxidase. Low levels "
+            "(2 to 10 ppm) act as a mucous membrane irritant causing cough, sore throat, and bronchial obstruction in asthmatics."
+        ),
+    },
+    {
+        "chunk_id": f"{ATSDR_DOC_ID}-CH-004",
+        "page": 74,
+        "section": "Health Effects — Neurological Effects & Knockdown",
+        "text": (
+            "Acute high exposure leads to immediate loss of consciousness ('knockdown' or sledgehammer effect). "
+            "Survivors may suffer persistent neurological sequelae including chronic headaches, vertigo, poor memory, "
+            "ataxia, sleep disturbance, and cognitive deficits."
+        ),
+    },
+    {
+        "chunk_id": f"{ATSDR_DOC_ID}-CH-005",
+        "page": 20,
+        "section": "Minimal Risk Levels (MRLs) — Inhalation Standards",
+        "text": (
+            "ATSDR established an Acute Inhalation MRL of 0.07 ppm for hydrogen sulfide (based on 2 ppm LOAEL for airway resistance in asthmatics) "
+            "and an Intermediate Inhalation MRL of 0.02 ppm (based on 10 ppm NOAEL for nasal olfactory neuron lesions in rats)."
+        ),
+    },
+    {
+        "chunk_id": f"{ATSDR_DOC_ID}-CH-006",
+        "page": 210,
+        "section": "Regulations & Occupational Exposure Limits",
+        "text": (
+            "Occupational standards for hydrogen sulfide: OSHA permissible ceiling is 20 ppm (peak 50 ppm for 10 min); "
+            "NIOSH recommended ceiling REL is 10 ppm (10 min) with IDLH at 100 ppm; ACGIH TLV 8-hr TWA is 1 ppm (STEL 5 ppm)."
+        ),
+    },
+    {
+        "chunk_id": f"{ATSDR_DOC_ID}-CH-007",
+        "page": 7,
+        "section": "Carbonyl Sulfide — Properties & Use",
+        "text": (
+            "Carbonyl sulfide (COS) is a colorless sulfur gas with an atmospheric lifetime of 2 to 10 years. "
+            "It is used as an agricultural grain fumigant alternative to methyl bromide and as a chemical intermediate in herbicide synthesis."
+        ),
+    },
+    {
+        "chunk_id": f"{ATSDR_DOC_ID}-CH-008",
+        "page": 121,
+        "section": "Toxicokinetics, Biomarkers & Emergency Management",
+        "text": (
+            "Hydrogen sulfide is metabolized by hepatic oxidation to sulfate and thiosulfate excreted in urine. "
+            "Urinary thiosulfate serves as a primary exposure biomarker. Emergency treatment requires rapid removal from exposure, "
+            "100% high-flow oxygen, supportive care, and consideration of sodium nitrite or hyperbaric oxygen therapy."
+        ),
+    },
+]
+
+
+def toxicology_documents() -> list[Document]:
+    docs = []
+    for item in ATSDR_CHUNKS:
+        docs.append(
+            Document(
+                page_content=item["text"],
+                metadata={
+                    "document_id": ATSDR_DOC_ID,
+                    "document_name": ATSDR_DOC_NAME,
+                    "page": item["page"],
+                    "page_number": item["page"],
+                    "section": item["section"],
+                    "chunk_id": item["chunk_id"],
+                    "source_url": ATSDR_SOURCE_URL,
                 },
             )
         )

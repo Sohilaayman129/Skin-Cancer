@@ -23,7 +23,7 @@ import { ChatStateService } from '../../services/chat-state.service';
               <span class="brand-name">Grounded</span>
               <span class="brand-badge">Clinical AI</span>
             </div>
-            <span class="brand-subtitle">USPSTF 2018 Skin Cancer Guideline</span>
+            <span class="brand-subtitle">USPSTF Skin Cancer & ATSDR Toxicology Guidelines</span>
           </div>
         </div>
       </div>

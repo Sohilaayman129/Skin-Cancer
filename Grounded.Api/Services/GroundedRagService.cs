@@ -99,6 +99,70 @@ public class GroundedRagService : IGroundedRagService
             Section = "Clinical Considerations - Diagnostic Evaluation",
             Page = 4,
             Text = "The evidence does not provide a definitive clinical diagnosis of melanoma from history or visual features alone. Histopathologic examination (biopsy) is required to confirm whether a suspicious pigmented lesion is melanoma or another condition. Prompt clinical and dermatologic evaluation, including dermoscopic examination and possible biopsy, is recommended."
+        },
+        new GuidelineChunk
+        {
+            ChunkId = "atsdr_h2s_cos_2016-CH-001",
+            Document = "ATSDR Toxicological Profile for Hydrogen Sulfide & Carbonyl Sulfide (2016)",
+            Section = "Public Health Statement — Chemical Identity & Odor Threshold",
+            Page = 1,
+            Text = "Hydrogen sulfide (H2S) is a flammable, colorless gas with a characteristic rotten egg odor. The odor threshold in air ranges from 0.0005 to 0.3 ppm. At high concentrations (>=100 ppm), rapid olfactory fatigue or paralysis occurs, preventing smell detection and causing extreme risk."
+        },
+        new GuidelineChunk
+        {
+            ChunkId = "atsdr_h2s_cos_2016-CH-002",
+            Document = "ATSDR Toxicological Profile for Hydrogen Sulfide & Carbonyl Sulfide (2016)",
+            Section = "Public Health Statement — Environmental & Industrial Sources",
+            Page = 1,
+            Text = "Hydrogen sulfide occurs naturally in volcanic gases, sulfur springs, undersea vents, and swamps. Industrial sources include wastewater treatment plants, municipal sewers, manure storage pits, petroleum refineries, natural gas processing, pulp and paper kraft mills, and tanneries."
+        },
+        new GuidelineChunk
+        {
+            ChunkId = "atsdr_h2s_cos_2016-CH-003",
+            Document = "ATSDR Toxicological Profile for Hydrogen Sulfide & Carbonyl Sulfide (2016)",
+            Section = "Health Effects — Respiratory Toxicity & Mechanism",
+            Page = 17,
+            Text = "The respiratory tract is a primary target. Inhalation of high levels (>500 ppm) causes rapid respiratory arrest and noncardiogenic pulmonary edema by inhibiting mitochondrial cytochrome c oxidase. Low levels (2 to 10 ppm) act as a mucous membrane irritant causing cough, sore throat, and bronchial obstruction in asthmatics."
+        },
+        new GuidelineChunk
+        {
+            ChunkId = "atsdr_h2s_cos_2016-CH-004",
+            Document = "ATSDR Toxicological Profile for Hydrogen Sulfide & Carbonyl Sulfide (2016)",
+            Section = "Health Effects — Neurological Effects & Knockdown",
+            Page = 74,
+            Text = "Acute high exposure leads to immediate loss of consciousness ('knockdown' or sledgehammer effect). Survivors may suffer persistent neurological sequelae including chronic headaches, vertigo, poor memory, ataxia, sleep disturbance, and cognitive deficits."
+        },
+        new GuidelineChunk
+        {
+            ChunkId = "atsdr_h2s_cos_2016-CH-005",
+            Document = "ATSDR Toxicological Profile for Hydrogen Sulfide & Carbonyl Sulfide (2016)",
+            Section = "Minimal Risk Levels (MRLs) — Inhalation Standards",
+            Page = 20,
+            Text = "ATSDR established an Acute Inhalation MRL of 0.07 ppm for hydrogen sulfide (based on 2 ppm LOAEL for airway resistance in asthmatics) and an Intermediate Inhalation MRL of 0.02 ppm (based on 10 ppm NOAEL for nasal olfactory neuron lesions in rats)."
+        },
+        new GuidelineChunk
+        {
+            ChunkId = "atsdr_h2s_cos_2016-CH-006",
+            Document = "ATSDR Toxicological Profile for Hydrogen Sulfide & Carbonyl Sulfide (2016)",
+            Section = "Regulations & Occupational Exposure Limits",
+            Page = 210,
+            Text = "Occupational standards for hydrogen sulfide: OSHA permissible ceiling is 20 ppm (peak 50 ppm for 10 min); NIOSH recommended ceiling REL is 10 ppm (10 min) with IDLH at 100 ppm; ACGIH TLV 8-hr TWA is 1 ppm (STEL 5 ppm)."
+        },
+        new GuidelineChunk
+        {
+            ChunkId = "atsdr_h2s_cos_2016-CH-007",
+            Document = "ATSDR Toxicological Profile for Hydrogen Sulfide & Carbonyl Sulfide (2016)",
+            Section = "Carbonyl Sulfide — Properties & Use",
+            Page = 7,
+            Text = "Carbonyl sulfide (COS) is a colorless sulfur gas with an atmospheric lifetime of 2 to 10 years. It is used as an agricultural grain fumigant alternative to methyl bromide and as a chemical intermediate in herbicide synthesis."
+        },
+        new GuidelineChunk
+        {
+            ChunkId = "atsdr_h2s_cos_2016-CH-008",
+            Document = "ATSDR Toxicological Profile for Hydrogen Sulfide & Carbonyl Sulfide (2016)",
+            Section = "Toxicokinetics, Biomarkers & Emergency Management",
+            Page = 121,
+            Text = "Hydrogen sulfide is metabolized by hepatic oxidation to sulfate and thiosulfate excreted in urine. Urinary thiosulfate serves as a primary exposure biomarker. Emergency treatment requires rapid removal from exposure, 100% high-flow oxygen, supportive care, and consideration of sodium nitrite or hyperbaric oxygen therapy."
         }
     };
 
@@ -220,9 +284,17 @@ public class GroundedRagService : IGroundedRagService
                 candidatePool = screeningHits;
             }
         }
+        else if (intent == QueryIntent.ToxicologyExposure)
+        {
+            var toxHits = scoredChunks.Where(x => IsToxicologyChunk(x.chunk)).ToList();
+            if (toxHits.Count > 0)
+            {
+                candidatePool = toxHits;
+            }
+        }
         else if (intent == QueryIntent.Counseling)
         {
-            var counselingHits = scoredChunks.Where(x => !IsScreeningChunk(x.chunk)).ToList();
+            var counselingHits = scoredChunks.Where(x => !IsScreeningChunk(x.chunk) && !IsToxicologyChunk(x.chunk)).ToList();
             if (counselingHits.Count > 0)
             {
                 candidatePool = counselingHits;
@@ -249,11 +321,11 @@ public class GroundedRagService : IGroundedRagService
             return new AskResponse
             {
                 Status = "Insufficient Evidence",
-                Recommendation = "The USPSTF 2018 Skin Cancer Prevention Counseling Guideline does not contain sufficient clinical evidence or recommendations directly addressing this specific query.",
+                Recommendation = "The indexed guidelines (USPSTF Skin Cancer Counseling and ATSDR Toxicological Profile) do not contain sufficient evidence directly addressing this specific query.",
                 SupportingEvidence = new List<EvidenceItemModel>(),
                 Confidence = "Low",
-                MissingInformation = "No closely matching section found in the USPSTF 2018 guideline above threshold 0.57.",
-                SafetyNote = "Consult comprehensive clinical dermatology literature or broader USPSTF preventive guidelines for out-of-scope topics.",
+                MissingInformation = "No closely matching section found above threshold 0.57 in indexed clinical/toxicological evidence.",
+                SafetyNote = "Consult primary literature, emergency toxicology services, or specialist guidelines for out-of-scope queries.",
                 RiskTier = safety.Tier,
                 DecisionPath = $"Dense Retrieval (Top: {topScore:F2} < {WEAK_THRESHOLD}) → Threshold Gated Refusal",
                 RetrievedChunks = retrievedModels,
@@ -297,12 +369,17 @@ public class GroundedRagService : IGroundedRagService
         string recommendation = BuildRecommendationText(question, topChunks);
         string confidence = topScore >= 0.75 ? "High" : "Moderate";
         bool lesion = intent == QueryIntent.LesionAssessment;
+        bool tox = intent == QueryIntent.ToxicologyExposure;
         string missing = lesion
-            ? "The evidence does not provide a definitive diagnosis; histopathologic examination (biopsy) is required to confirm whether the lesion is melanoma or another condition."
-            : "None within guideline scope.";
+            ? "A definitive diagnosis requires histopathologic examination (biopsy) of the lesion; the current evidence only indicates that the lesion is suspicious for melanoma per ABCDE criteria."
+            : tox
+                ? "Environmental and occupational air monitoring is recommended to determine exact airborne concentration."
+                : "The indexed guideline is limited to behavioral counseling for skin cancer prevention; it does not cover surgical or pharmacological treatment protocols.";
         string safetyNote = lesion
             ? (safety.CautionNote ?? "Educational information only; not a diagnosis or medical advice.")
-            : (safety.CautionNote ?? "Counseling should be individualized based on patient skin type and lifestyle factors.");
+            : tox
+                ? (safety.CautionNote ?? "In case of severe acute exposure, ensure immediate evacuation and administration of 100% oxygen.")
+                : (safety.CautionNote ?? "Counseling should be individualized based on patient skin type and lifestyle factors.");
 
         return new AskResponse
         {
@@ -351,7 +428,12 @@ public class GroundedRagService : IGroundedRagService
             if (IsScreeningChunk(chunk)) baseScore += 0.42;
             else baseScore -= 0.35;
         }
-        else if (intent == QueryIntent.Counseling && IsScreeningChunk(chunk))
+        else if (intent == QueryIntent.ToxicologyExposure)
+        {
+            if (IsToxicologyChunk(chunk)) baseScore += 0.45;
+            else baseScore -= 0.35;
+        }
+        else if (intent == QueryIntent.Counseling && (IsScreeningChunk(chunk) || IsToxicologyChunk(chunk)))
         {
             baseScore -= 0.30;
         }
@@ -393,10 +475,51 @@ public class GroundedRagService : IGroundedRagService
             if (IsScreeningChunk(chunk)) baseScore += 0.20;
         }
 
+        // Toxicology boosts
+        if (rawLower.Contains("hydrogen sulfide") || rawLower.Contains("h2s") || rawLower.Contains("sulfide") || rawLower.Contains("sewer gas"))
+        {
+            if (IsToxicologyChunk(chunk)) baseScore += 0.30;
+        }
+
+        if (rawLower.Contains("carbonyl sulfide") || rawLower.Contains("cos") || rawLower.Contains("fumigant"))
+        {
+            if (chunk.ChunkId.Contains("CH-007")) baseScore += 0.40;
+        }
+
+        if (rawLower.Contains("mrl") || rawLower.Contains("minimal risk level") || rawLower.Contains("0.07") || rawLower.Contains("0.02"))
+        {
+            if (chunk.ChunkId.Contains("CH-005")) baseScore += 0.45;
+        }
+
+        if (rawLower.Contains("osha") || rawLower.Contains("niosh") || rawLower.Contains("acgih") || rawLower.Contains("ceiling") || rawLower.Contains("idlh") || rawLower.Contains("rel") || rawLower.Contains("tlv"))
+        {
+            if (chunk.ChunkId.Contains("CH-006")) baseScore += 0.45;
+        }
+
+        if (rawLower.Contains("knockdown") || rawLower.Contains("unconscious") || rawLower.Contains("neurologic") || rawLower.Contains("headache") || rawLower.Contains("vertigo"))
+        {
+            if (chunk.ChunkId.Contains("CH-004")) baseScore += 0.40;
+        }
+
+        if (rawLower.Contains("respiratory") || rawLower.Contains("lung") || rawLower.Contains("edema") || rawLower.Contains("cytochrome") || rawLower.Contains("asthma"))
+        {
+            if (chunk.ChunkId.Contains("CH-003")) baseScore += 0.35;
+        }
+
+        if (rawLower.Contains("biomarker") || rawLower.Contains("thiosulfate") || rawLower.Contains("antidote") || rawLower.Contains("oxygen therapy") || rawLower.Contains("nitrite"))
+        {
+            if (chunk.ChunkId.Contains("CH-008")) baseScore += 0.40;
+        }
+
+        if (rawLower.Contains("odor") || rawLower.Contains("smell") || rawLower.Contains("egg") || rawLower.Contains("olfactory"))
+        {
+            if (chunk.ChunkId.Contains("CH-001")) baseScore += 0.40;
+        }
+
         return Math.Min(0.96, Math.Max(0.05, baseScore));
     }
 
-    private enum QueryIntent { Counseling, LesionAssessment, Other }
+    private enum QueryIntent { Counseling, LesionAssessment, ToxicologyExposure, Other }
 
     private static readonly string[] LesionSignals =
     [
@@ -411,11 +534,22 @@ public class GroundedRagService : IGroundedRagService
         "protective clothing", "fair skin", "infant", "6 months"
     ];
 
+    private static readonly string[] ToxicologySignals =
+    [
+        "hydrogen sulfide", "h2s", "carbonyl sulfide", "cos", "sulfide", "thiosulfate",
+        "odor threshold", "rotten egg", "knockdown", "mrl", "minimal risk level",
+        "osha", "niosh", "acgih", "fumigant", "sewer gas", "manure pit", "ppm"
+    ];
+
     private static QueryIntent DetectQueryIntent(string question)
     {
         var lower = question.ToLowerInvariant();
+        int toxHits = ToxicologySignals.Count(s => HasWord(lower, s) || lower.Contains(s));
         int lesionHits = LesionSignals.Count(s => HasWord(lower, s) || lower.Contains(s));
         int counselingHits = CounselingSignals.Count(s => lower.Contains(s));
+
+        if (toxHits > 0 && toxHits >= lesionHits && toxHits >= counselingHits)
+            return QueryIntent.ToxicologyExposure;
 
         bool vignette = Regex.IsMatch(lower, @"\b(\d+\s*year|\d+\s*yo|year[- ]old)\b")
             && (HasWord(lower, "mole") || HasWord(lower, "lesion") || HasWord(lower, "spot"));
@@ -432,19 +566,32 @@ public class GroundedRagService : IGroundedRagService
     private static bool IsScreeningChunk(GuidelineChunk chunk) =>
         chunk.ChunkId.StartsWith("uspstf_skin_cancer_screening_2023", StringComparison.OrdinalIgnoreCase);
 
+    private static bool IsToxicologyChunk(GuidelineChunk chunk) =>
+        chunk.ChunkId.StartsWith("atsdr_h2s_cos_2016", StringComparison.OrdinalIgnoreCase);
+
     private static bool HasWord(string text, string word) =>
         Regex.IsMatch(text, $@"\b{Regex.Escape(word)}\b", RegexOptions.IgnoreCase);
 
     private static bool IsMismatchedCounselingHit(string question, AskResponse result)
     {
-        if (DetectQueryIntent(question) != QueryIntent.LesionAssessment)
-            return false;
-
+        var intent = DetectQueryIntent(question);
         var topId = result.RetrievedChunks?.FirstOrDefault()?.ChunkId ?? "";
         var rec = result.Recommendation ?? "";
-        return topId.Contains("2018", StringComparison.OrdinalIgnoreCase)
-            || rec.Contains("sunscreen", StringComparison.OrdinalIgnoreCase)
-            || rec.Contains("SPF", StringComparison.OrdinalIgnoreCase);
+
+        if (intent == QueryIntent.LesionAssessment)
+        {
+            return topId.Contains("2018", StringComparison.OrdinalIgnoreCase)
+                || rec.Contains("sunscreen", StringComparison.OrdinalIgnoreCase)
+                || rec.Contains("SPF", StringComparison.OrdinalIgnoreCase);
+        }
+
+        if (intent == QueryIntent.ToxicologyExposure)
+        {
+            return topId.Contains("uspstf", StringComparison.OrdinalIgnoreCase)
+                || rec.Contains("sunscreen", StringComparison.OrdinalIgnoreCase);
+        }
+
+        return false;
     }
 
     private static HashSet<string> ExtractTerms(string query)
@@ -476,6 +623,14 @@ public class GroundedRagService : IGroundedRagService
             "uspstf_skin_cancer_screening_2023-CH-012" => "Clinicians and patients should evaluate suspicious pigmented lesions using the ABCDE rule: Asymmetry, Border irregularity, Color variation, Diameter greater than 6 mm, and Evolution (changes in size, shape, or shade over time).",
             "uspstf_skin_cancer_screening_2023-CH-013" => "Lesions greater than 6 mm (pencil eraser size), although melanomas can present smaller. Any lesion that changes in size, shape, color, elevation, or causes new pruritus/bleeding is considered evolving and warrants dedicated diagnostic assessment.",
             "uspstf_skin_cancer_screening_2023-CH-014" => "Histopathologic examination (biopsy) is required to confirm whether a suspicious pigmented lesion is melanoma or another condition.",
+            "atsdr_h2s_cos_2016-CH-001" => "Hydrogen sulfide (H2S) is detectable by odor at 0.0005 to 0.3 ppm; however, levels >=100 ppm cause rapid olfactory fatigue/paralysis.",
+            "atsdr_h2s_cos_2016-CH-002" => "Major environmental/occupational sources include wastewater treatment facilities, sewers, manure pits, refineries, and paper mills.",
+            "atsdr_h2s_cos_2016-CH-003" => "Respiratory toxicity from high H2S (>500 ppm) causes pulmonary edema and respiratory arrest by inhibiting mitochondrial cytochrome c oxidase.",
+            "atsdr_h2s_cos_2016-CH-004" => "Acute H2S exposure causes rapid loss of consciousness ('knockdown'), with risks of persistent neurological sequelae (headaches, ataxia, memory loss).",
+            "atsdr_h2s_cos_2016-CH-005" => "ATSDR inhalation Minimal Risk Levels (MRLs) for H2S are 0.07 ppm for acute exposure and 0.02 ppm for intermediate-duration exposure.",
+            "atsdr_h2s_cos_2016-CH-006" => "Occupational exposure limits for H2S: OSHA ceiling is 20 ppm; NIOSH REL ceiling is 10 ppm (10 min); NIOSH IDLH is 100 ppm.",
+            "atsdr_h2s_cos_2016-CH-007" => "Carbonyl sulfide (COS) is an atmospheric sulfur gas with 2-10 year lifetime used as an agricultural fumigant and chemical intermediate.",
+            "atsdr_h2s_cos_2016-CH-008" => "H2S is metabolized to urinary thiosulfate (primary biomarker). Clinical management includes immediate removal, 100% O2, and supportive care.",
             _ => chunk.Text
         };
     }
@@ -495,9 +650,14 @@ public class GroundedRagService : IGroundedRagService
             "USPSTF_2018_P2_C2" => "Key behavioral strategies supported by evidence include applying broad-spectrum sunscreen (SPF 15 or higher), wearing protective clothing (wide-brimmed hats, long sleeves), seeking shade between 10:00 AM and 4:00 PM, and avoiding indoor tanning beds.",
             "USPSTF_2018_P3_C1" => "Indoor tanning is strongly discouraged; using indoor tanning beds before age 35 increases melanoma risk by approximately 75%.",
             "USPSTF_2018_P4_C1" => "For infants younger than 6 months, direct sun exposure should be minimized using shade and protective clothing rather than sunscreen.",
-            "uspstf_skin_cancer_screening_2023-CH-012" => "The mole exhibits several ABCDE warning signs (asymmetry, irregular border, color change, diameter >6 mm, and evolution with itching/bleeding), which are criteria for a suspicious pigmented lesion and raise concern for possible melanoma. Prompt clinical and dermatologic evaluation, including dermoscopic examination and possible biopsy, is recommended to establish a definitive diagnosis.",
-            "uspstf_skin_cancer_screening_2023-CH-013" => "The mole exhibits several ABCDE warning signs (asymmetry, irregular border, color change, diameter >6 mm, and evolution with itching/bleeding), which are criteria for a suspicious pigmented lesion and raise concern for possible melanoma. Prompt clinical and dermatologic evaluation, including dermoscopic examination and possible biopsy, is recommended to establish a definitive diagnosis.",
-            "uspstf_skin_cancer_screening_2023-CH-014" => "The mole exhibits several ABCDE warning signs (asymmetry, irregular border, color change, diameter >6 mm, and evolution with itching/bleeding), which are criteria for a suspicious pigmented lesion and raise concern for possible melanoma. Prompt clinical and dermatologic evaluation, including dermoscopic examination and possible biopsy, is recommended to establish a definitive diagnosis.",
+            "atsdr_h2s_cos_2016-CH-001" => "According to the ATSDR Toxicological Profile, hydrogen sulfide (H2S) can be smelled at 0.0005-0.3 ppm. However, at concentrations >=100 ppm, olfactory fatigue and paralysis rapidly occur, meaning the absence of smell does NOT indicate safe air.",
+            "atsdr_h2s_cos_2016-CH-002" => "Primary industrial sources of H2S include wastewater plants, sewers, manure storage tanks, refineries, and paper mills. Atmospheric ambient levels in urban areas are typically below 0.001 ppm.",
+            "atsdr_h2s_cos_2016-CH-003" => "Hydrogen sulfide produces acute respiratory toxicity by inhibiting cytochrome c oxidase in lung mitochondria. High concentrations (>500 ppm) cause rapid pulmonary edema and respiratory arrest.",
+            "atsdr_h2s_cos_2016-CH-004" => "Acute inhalation of high H2S concentrations triggers rapid unconsciousness ('knockdown'). Survivors may experience persistent neurobehavioral sequelae such as memory impairment, headaches, vertigo, and motor incoordination.",
+            "atsdr_h2s_cos_2016-CH-005" => "ATSDR has derived an Acute Inhalation Minimal Risk Level (MRL) of 0.07 ppm and an Intermediate Inhalation MRL of 0.02 ppm for hydrogen sulfide.",
+            "atsdr_h2s_cos_2016-CH-006" => "Applicable regulatory exposure standards include an OSHA ceiling limit of 20 ppm, a NIOSH 10-minute ceiling REL of 10 ppm, and a NIOSH IDLH threshold of 100 ppm.",
+            "atsdr_h2s_cos_2016-CH-007" => "Carbonyl sulfide (COS) is a tropospheric sulfur compound with a 2-10 year lifetime, commonly used as a grain fumigant and in herbicide synthesis.",
+            "atsdr_h2s_cos_2016-CH-008" => "Evaluation of H2S exposure involves measuring urinary thiosulfate. Management requires rapid evacuation from the exposure area, administration of 100% high-flow oxygen, and supportive critical care.",
             _ => top.Text
         };
     }

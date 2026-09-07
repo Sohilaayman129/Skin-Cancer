@@ -1,5 +1,9 @@
 # 🏥 Grounded — Evidence-Bound Clinical AI Assistant
 
+[![Live Demo](https://img.shields.io/badge/Live_Demo-Azure_Static_Apps-0078d4.svg?logo=microsoftazure&style=for-the-badge)](https://gray-meadow-0905ff910.6.azurestaticapps.net)
+[![API Endpoint](https://img.shields.io/badge/API_Service-Azure_App_Service-0089d6.svg?logo=microsoftazure&style=for-the-badge)](https://grounded-clinical-api-sohila-b5dghch4f2a8b4cm.westus3-01.azurewebsites.net)
+[![GitHub](https://img.shields.io/badge/GitHub-Repository-181717.svg?logo=github&style=for-the-badge)](https://github.com/Sohilaayman129/Skin-Cancer)
+
 [![Frontend](https://img.shields.io/badge/Frontend-Angular_19-dd0031.svg?logo=angular)](#-tech-stack)
 [![Backend](https://img.shields.io/badge/Backend-ASP.NET_Core_9.0-512bd4.svg?logo=dotnet)](#-tech-stack)
 [![Clinical Grounding](https://img.shields.io/badge/Clinical_Guideline-USPSTF_2018_%26_ATSDR-059669.svg)](#-clinical-scope)
@@ -7,6 +11,10 @@
 [![Hallucination Rate](https://img.shields.io/badge/Unsupported_Claims-0.0%25-emerald.svg)](#-clinical-evaluation-scorecard)
 [![Evidence Gap Analysis](https://img.shields.io/badge/Diagnostic_Gap_Analysis-Active-9333ea.svg)](#-key-features)
 [![License](https://img.shields.io/badge/License-MIT-purple.svg)](#)
+
+> 🔗 **Live Cloud Deployment:**
+> * **🖥️ Web Application (Frontend):** [https://gray-meadow-0905ff910.6.azurestaticapps.net](https://gray-meadow-0905ff910.6.azurestaticapps.net)
+> * **⚡ REST API Service (Backend):** [https://grounded-clinical-api-sohila-b5dghch4f2a8b4cm.westus3-01.azurewebsites.net](https://grounded-clinical-api-sohila-b5dghch4f2a8b4cm.westus3-01.azurewebsites.net)
 
 > **"Fluent ≠ Safe."**  
 > In clinical AI, an unsupported claim is a medical hazard. **Grounded** is an evidence-bound Clinical Decision Support assistant strictly grounded in the **USPSTF 2018 Skin Cancer Prevention: Behavioral Counseling Guideline** and **ATSDR Toxicological Profiles**. Every claim is tethered to a verifiable citation with document section, page numbers, and chunk IDs. Refusal and explicit diagnostic boundary detection are treated as first-class clinical decisions.

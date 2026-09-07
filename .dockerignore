@@ -1,0 +1,38 @@
+# Git and IDE files
+.git
+.gitignore
+.gitattributes
+.vs
+.vscode
+.idea
+
+# Node.js and Frontend
+node_modules
+**/node_modules
+.angular
+**/dist
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+bun.lock
+
+# .NET Build artifacts
+**/bin
+**/obj
+out/
+
+# Python cache & virtual environments
+__pycache__
+**/*.pyc
+**/*.pyo
+**/*.pyd
+.pytest_cache
+venv/
+.venv/
+env/
+.env
+
+# Scratch and temp files
+scratch/
+*.tmp
+*.log

@@ -2,6 +2,7 @@ import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ChatStateService } from '../../services/chat-state.service';
 import { GroundedApiService } from '../../services/grounded-api.service';
+import { TranslationService } from '../../services/translation.service';
 import { SampleQuestion } from '../../models/grounded.models';
 
 @Component({
@@ -16,14 +17,14 @@ import { SampleQuestion } from '../../models/grounded.models';
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M12 5v14M5 12h14"/>
           </svg>
-          <span>New Consultation</span>
+          <span>{{ i18n.t('new_consultation') }}</span>
         </button>
       </div>
 
       <!-- History Sessions -->
       <div class="sidebar-section">
         <div class="section-title">
-          <span>Clinical History</span>
+          <span>{{ i18n.t('clinical_history') }}</span>
           <span class="count-pill">{{ chatState.sessions().length }}</span>
         </div>
 
@@ -45,7 +46,7 @@ import { SampleQuestion } from '../../models/grounded.models';
               <button 
                 class="btn-delete" 
                 (click)="$event.stopPropagation(); chatState.deleteSession(session.id)"
-                title="Delete Session">
+                [title]="i18n.t('delete_session')">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
                 </svg>
@@ -53,7 +54,7 @@ import { SampleQuestion } from '../../models/grounded.models';
             </div>
           } @empty {
             <div class="empty-sessions">
-              <span>No saved consultations yet.</span>
+              <span>{{ i18n.t('no_saved_consultations') }}</span>
             </div>
           }
         </div>
@@ -62,7 +63,7 @@ import { SampleQuestion } from '../../models/grounded.models';
       <!-- Sample Guideline Prompts -->
       <div class="sidebar-section prompts-section">
         <div class="section-title">
-          <span>Guideline Benchmarks</span>
+          <span>{{ i18n.t('guideline_benchmarks') }}</span>
         </div>
 
         <div class="prompts-list">
@@ -81,19 +82,19 @@ import { SampleQuestion } from '../../models/grounded.models';
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
           </svg>
-          <span>USPSTF 2018 Policy</span>
+          <span>{{ i18n.t('uspstf_policy') }}</span>
         </div>
         <div class="guideline-metric">
-          <span>Target Group:</span>
-          <strong>6 mo – 24 yrs (Grade B)</strong>
+          <span>{{ i18n.t('target_group') }}</span>
+          <strong>{{ i18n.t('target_group_val') }}</strong>
         </div>
         <div class="guideline-metric">
-          <span>Adults >24y:</span>
-          <strong>Insufficient Ev. (Grade I)</strong>
+          <span>{{ i18n.t('adults_val_label') }}</span>
+          <strong>{{ i18n.t('adults_val') }}</strong>
         </div>
         <div class="guideline-metric">
-          <span>Safety Gate:</span>
-          <strong class="green-text">5-Tier Pre-Gen Filter</strong>
+          <span>{{ i18n.t('safety_gate_label') }}</span>
+          <strong class="green-text">{{ i18n.t('safety_gate_val') }}</strong>
         </div>
       </div>
     </aside>
@@ -349,6 +350,7 @@ import { SampleQuestion } from '../../models/grounded.models';
 })
 export class SidebarComponent implements OnInit {
   chatState = inject(ChatStateService);
+  i18n = inject(TranslationService);
   private api = inject(GroundedApiService);
 
   isCollapsed = signal<boolean>(false);

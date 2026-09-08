@@ -2,6 +2,7 @@ import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ChatStateService } from '../../services/chat-state.service';
+import { TranslationService } from '../../services/translation.service';
 
 @Component({
   selector: 'app-chat-input',
@@ -33,7 +34,7 @@ import { ChatStateService } from '../../services/chat-state.service';
           (keydown.enter)="onEnter($event)"
           (focus)="isFocused.set(true)"
           (blur)="isFocused.set(false)"
-          placeholder="Ask a clinical skin cancer counseling question (e.g. target age, SPF, tanning risk)..."
+          [placeholder]="i18n.t('input_placeholder')"
           rows="1"
           [disabled]="chatState.isLoading()"></textarea>
 
@@ -44,7 +45,7 @@ import { ChatStateService } from '../../services/chat-state.service';
             class="btn-send" 
             [disabled]="!userInput.trim() || chatState.isLoading()"
             (click)="onSubmit()"
-            title="Send Question (Enter)">
+            [title]="i18n.t('send_consultation')">
             @if (chatState.isLoading()) {
               <div class="spinner"></div>
             } @else {
@@ -58,7 +59,7 @@ import { ChatStateService } from '../../services/chat-state.service';
       </div>
 
       <div class="input-disclaimer">
-        <span>Grounded in the USPSTF 2018 Recommendation Statement. Evidence-bound clinical decision support only.</span>
+        <span>{{ i18n.t('disclaimer_note') }}</span>
       </div>
     </div>
   `,
@@ -207,6 +208,7 @@ import { ChatStateService } from '../../services/chat-state.service';
 })
 export class ChatInputComponent {
   chatState = inject(ChatStateService);
+  i18n = inject(TranslationService);
 
   userInput: string = '';
   isFocused = signal<boolean>(false);

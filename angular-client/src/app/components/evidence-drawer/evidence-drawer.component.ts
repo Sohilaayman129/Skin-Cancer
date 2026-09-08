@@ -1,6 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ChatStateService } from '../../services/chat-state.service';
+import { TranslationService } from '../../services/translation.service';
 
 @Component({
   selector: 'app-evidence-drawer',
@@ -16,12 +17,12 @@ import { ChatStateService } from '../../services/chat-state.service';
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
                 </svg>
-                <span>USPSTF 2018 Official Guideline</span>
+                <span>{{ i18n.t('uspstf_policy') }}</span>
               </div>
               <h3 class="drawer-title">{{ ev.citation.section }}</h3>
             </div>
 
-            <button class="btn-close" (click)="chatState.closeEvidenceDrawer()">
+            <button class="btn-close" (click)="chatState.closeEvidenceDrawer()" [title]="i18n.t('close_btn')">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <line x1="18" y1="6" x2="6" y2="18"/>
                 <line x1="6" y1="6" x2="18" y2="18"/>
@@ -33,26 +34,26 @@ import { ChatStateService } from '../../services/chat-state.service';
             <!-- Metadata Grid -->
             <div class="meta-grid">
               <div class="meta-item">
-                <span class="meta-label">Document:</span>
+                <span class="meta-label">{{ i18n.t('meta_document') }}:</span>
                 <span class="meta-value">{{ ev.citation.document }}</span>
               </div>
               <div class="meta-item">
-                <span class="meta-label">Page:</span>
-                <span class="meta-value">Page {{ ev.citation.page }}</span>
+                <span class="meta-label">{{ i18n.t('meta_page') }}:</span>
+                <span class="meta-value">{{ i18n.t('meta_page') }} {{ ev.citation.page }}</span>
               </div>
               <div class="meta-item">
-                <span class="meta-label">Chunk ID:</span>
+                <span class="meta-label">{{ i18n.t('meta_chunk_id') }}:</span>
                 <span class="meta-value code-font">{{ ev.citation.chunk_id }}</span>
               </div>
               <div class="meta-item">
-                <span class="meta-label">Verification:</span>
+                <span class="meta-label">{{ i18n.t('grounded_claim_tag') }}:</span>
                 <span class="meta-value verified-text">100% Grounded</span>
               </div>
             </div>
 
             <!-- Grounded Claim -->
             <div class="section-box">
-              <div class="section-label">Extracted Clinical Claim:</div>
+              <div class="section-label">{{ i18n.t('claim_statement') }}</div>
               <div class="claim-box">
                 <p>{{ ev.claim }}</p>
               </div>
@@ -60,7 +61,7 @@ import { ChatStateService } from '../../services/chat-state.service';
 
             <!-- Verbatim Passage -->
             <div class="section-box">
-              <div class="section-label">Verbatim Guideline Passage:</div>
+              <div class="section-label">{{ i18n.t('official_passage') }}</div>
               <div class="passage-box">
                 <p>{{ ev.passage || 'Direct passage extracted from official USPSTF Skin Cancer Counseling Guideline.' }}</p>
               </div>
@@ -73,7 +74,7 @@ import { ChatStateService } from '../../services/chat-state.service';
                 <line x1="12" y1="8" x2="12" y2="12"/>
                 <line x1="12" y1="16" x2="12.01" y2="16"/>
               </svg>
-              <span>This citation is locked to the official USPSTF 2018 Recommendation. The assistant cannot fabricate sources or reference unverified external documents.</span>
+              <span>{{ i18n.t('disclaimer_note') }}</span>
             </div>
           </div>
         </div>
@@ -287,4 +288,5 @@ import { ChatStateService } from '../../services/chat-state.service';
 })
 export class EvidenceDrawerComponent {
   chatState = inject(ChatStateService);
+  i18n = inject(TranslationService);
 }

@@ -1,7 +1,8 @@
-import { Component, Input, signal } from '@angular/core';
+import { Component, Input, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ChatMessage } from '../../models/grounded.models';
 import { ClaimCardComponent } from '../claim-card/claim-card.component';
+import { TranslationService } from '../../services/translation.service';
 
 @Component({
   selector: 'app-message-card',
@@ -50,7 +51,7 @@ import { ClaimCardComponent } from '../claim-card/claim-card.component';
                 <!-- Risk Tier Badge -->
                 @if (message.response?.risk_tier; as tier) {
                   <div class="badge-tier" [ngClass]="getTierBadgeClass(tier)">
-                    <span>Risk: {{ tier }}</span>
+                    <span>{{ i18n.t('risk_tier_label') }}: {{ tier }}</span>
                   </div>
                 }
               </div>
@@ -59,7 +60,7 @@ import { ClaimCardComponent } from '../claim-card/claim-card.component';
               @if (message.response; as resp) {
                 <div class="header-meta">
                   <div class="confidence-pill" [ngClass]="getConfidenceClass(resp.confidence)">
-                    <span>Confidence: <strong>{{ resp.confidence }}</strong></span>
+                    <span>{{ i18n.t('confidence_label') }}: <strong>{{ resp.confidence }}</strong></span>
                   </div>
                 </div>
               }
@@ -88,9 +89,9 @@ import { ClaimCardComponent } from '../claim-card/claim-card.component';
             @if (message.response?.supporting_evidence?.length) {
               <div class="evidence-section">
                 <div class="evidence-section-header">
-                  <span class="evidence-title">Verifiable Evidence Citations</span>
+                  <span class="evidence-title">{{ i18n.t('evidence_citations_title') }}</span>
                   <span class="evidence-count">
-                    {{ message.response?.supporting_evidence?.length }} claims · {{ message.response?.validation?.citations_verified ?? message.response?.supporting_evidence?.length }} verified
+                    {{ message.response?.supporting_evidence?.length }} {{ i18n.t('claims_verified_suffix') }}
                   </span>
                 </div>
                 
@@ -110,7 +111,7 @@ import { ClaimCardComponent } from '../claim-card/claim-card.component';
                     <span class="gap-pill">Gap</span>
                   </div>
                   <div class="gap-body">
-                    <span class="gap-heading">Evidence Boundary & Diagnostic Limitation</span>
+                    <span class="gap-heading">{{ i18n.t('gap_title') }}</span>
                     <p class="gap-text">{{ gap }}</p>
                   </div>
                 </div>
@@ -127,11 +128,11 @@ import { ClaimCardComponent } from '../claim-card/claim-card.component';
                       <polyline points="2 17 12 22 22 17"/>
                       <polyline points="2 12 12 17 22 12"/>
                     </svg>
-                    <span>Dense Retrieval Inspection ({{ message.response?.retrieved_chunks?.length }} Chunks)</span>
+                    <span>{{ i18n.t('retrieval_inspect_title') }} ({{ message.response?.retrieved_chunks?.length }} Chunks)</span>
                   </div>
                   <div class="toggle-right">
-                    <span class="score-pill">Top: {{ message.response?.top_score | number:'1.2-2' }}</span>
-                    <span class="threshold-pill">Gate: {{ message.response?.weak_threshold }}</span>
+                    <span class="score-pill">{{ i18n.t('top_score_label') }}: {{ message.response?.top_score | number:'1.2-2' }}</span>
+                    <span class="threshold-pill">{{ i18n.t('gate_threshold_label') }}: {{ message.response?.weak_threshold }}</span>
                     <svg class="chevron" [class.open]="showChunks()" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                       <polyline points="6 9 12 15 18 9"/>
                     </svg>
@@ -166,9 +167,11 @@ import { ClaimCardComponent } from '../claim-card/claim-card.component';
 
               <div class="footer-actions">
                 <span class="msg-time">{{ message.timestamp | date:'shortTime' }}</span>
-                <button class="btn-copy" (click)="copyResponse()" title="Copy Recommendation">
+                <button class="btn-copy" (click)="copyResponse()" [title]="i18n.t('copy_response')">
                   @if (copied()) {
-                    <span class="copied-text">Copied!</span>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <polyline points="20 6 9 17 4 12"/>
+                    </svg>
                   } @else {
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                       <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
@@ -649,6 +652,7 @@ import { ClaimCardComponent } from '../claim-card/claim-card.component';
 })
 export class MessageCardComponent {
   @Input({ required: true }) message!: ChatMessage;
+  i18n = inject(TranslationService);
 
   showChunks = signal<boolean>(false);
   copied = signal<boolean>(false);

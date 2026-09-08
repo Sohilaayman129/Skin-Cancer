@@ -2,6 +2,7 @@ import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ThemeService } from '../../services/theme.service';
 import { ChatStateService } from '../../services/chat-state.service';
+import { TranslationService } from '../../services/translation.service';
 
 @Component({
   selector: 'app-header',
@@ -20,10 +21,10 @@ import { ChatStateService } from '../../services/chat-state.service';
           </div>
           <div class="logo-text">
             <div class="brand-title">
-              <span class="brand-name">Grounded</span>
-              <span class="brand-badge">Clinical AI</span>
+              <span class="brand-name">{{ i18n.t('brand_name') }}</span>
+              <span class="brand-badge">{{ i18n.t('brand_badge') }}</span>
             </div>
-            <span class="brand-subtitle">USPSTF Skin Cancer & ATSDR Toxicology Guidelines</span>
+            <span class="brand-subtitle">{{ i18n.t('brand_subtitle') }}</span>
           </div>
         </div>
       </div>
@@ -31,7 +32,7 @@ import { ChatStateService } from '../../services/chat-state.service';
       <div class="header-center">
         <div class="stack-badge">
           <span class="badge-dot pulse-green"></span>
-          <span class="stack-text">Angular 19 + .NET 9 API</span>
+          <span class="stack-text">{{ i18n.t('stack_text') }}</span>
         </div>
         
         @if (chatState.isTemporaryMode()) {
@@ -39,7 +40,7 @@ import { ChatStateService } from '../../services/chat-state.service';
             <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M2 12h20M7 8l5-5 5 5M12 3v18"/>
             </svg>
-            <span>Incognito Mode Active</span>
+            <span>{{ i18n.t('incognito_active') }}</span>
           </div>
         }
       </div>
@@ -53,12 +54,25 @@ import { ChatStateService } from '../../services/chat-state.service';
           </span>
         </div>
 
+        <!-- Language Switcher Button -->
+        <button 
+          class="btn-lang" 
+          (click)="i18n.toggleLanguage()"
+          [title]="i18n.isArabic() ? 'Switch to English' : 'التحويل إلى اللغة العربية'">
+          <svg class="icon-globe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="2" y1="12" x2="22" y2="12"/>
+            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+          </svg>
+          <span class="lang-label">{{ i18n.t('lang_name') }}</span>
+        </button>
+
         <!-- Incognito Toggle Button -->
         <button 
           class="btn-icon" 
           [class.active]="chatState.isTemporaryMode()"
           (click)="chatState.toggleTemporaryMode()"
-          title="Toggle Incognito Consultation (No History Stored)">
+          [title]="i18n.t('incognito_tooltip')">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
             <line x1="1" y1="1" x2="23" y2="23"/>
@@ -66,7 +80,7 @@ import { ChatStateService } from '../../services/chat-state.service';
         </button>
 
         <!-- Theme Toggle -->
-        <button class="btn-icon theme-btn" (click)="theme.toggleTheme()" title="Toggle Dark/Light Mode">
+        <button class="btn-icon theme-btn" (click)="theme.toggleTheme()" [title]="i18n.t('theme_tooltip')">
           @if (theme.isDark()) {
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <circle cx="12" cy="12" r="5"/>
@@ -106,7 +120,7 @@ import { ChatStateService } from '../../services/chat-state.service';
     .header-left, .header-right {
       display: flex;
       align-items: center;
-      gap: 0.75rem;
+      gap: 0.65rem;
     }
 
     .header-center {
@@ -129,10 +143,10 @@ import { ChatStateService } from '../../services/chat-state.service';
       display: flex;
       align-items: center;
       justify-content: center;
-      background: linear-gradient(135deg, var(--primary-color), var(--accent-cyan));
+      background: linear-gradient(135deg, var(--primary-color), var(--medical-teal));
       border-radius: 10px;
       color: white;
-      box-shadow: 0 0 20px rgba(16, 185, 129, 0.35);
+      box-shadow: 0 0 20px rgba(2, 132, 199, 0.35);
     }
 
     .logo-icon {
@@ -162,10 +176,10 @@ import { ChatStateService } from '../../services/chat-state.service';
       font-size: 0.7rem;
       font-weight: 600;
       padding: 0.15rem 0.45rem;
-      background: rgba(16, 185, 129, 0.15);
+      background: var(--badge-bg);
       color: var(--primary-color);
       border-radius: 6px;
-      border: 1px solid rgba(16, 185, 129, 0.3);
+      border: 1px solid var(--border-highlight);
       text-transform: uppercase;
       letter-spacing: 0.05em;
     }
@@ -192,8 +206,8 @@ import { ChatStateService } from '../../services/chat-state.service';
       width: 8px;
       height: 8px;
       border-radius: 50%;
-      background: #10b981;
-      box-shadow: 0 0 10px #10b981;
+      background: var(--medical-teal);
+      box-shadow: 0 0 10px var(--medical-teal);
       animation: pulse 2s infinite;
     }
 
@@ -223,8 +237,8 @@ import { ChatStateService } from '../../services/chat-state.service';
     }
 
     .health-pill.healthy .status-indicator {
-      background: #10b981;
-      box-shadow: 0 0 6px #10b981;
+      background: var(--medical-teal);
+      box-shadow: 0 0 6px var(--medical-teal);
     }
 
     .status-indicator {
@@ -232,6 +246,34 @@ import { ChatStateService } from '../../services/chat-state.service';
       height: 7px;
       border-radius: 50%;
       background: #f59e0b;
+    }
+
+    /* Language Switcher Button */
+    .btn-lang {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      height: 38px;
+      padding: 0 0.75rem;
+      border-radius: 9px;
+      border: 1px solid var(--border-subtle);
+      background: var(--bg-surface-elevated);
+      color: var(--primary-color);
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .btn-lang:hover {
+      background: var(--bg-surface-hover);
+      border-color: var(--primary-color);
+      transform: translateY(-1px);
+    }
+
+    .icon-globe {
+      width: 16px;
+      height: 16px;
     }
 
     .btn-icon {
@@ -280,4 +322,6 @@ import { ChatStateService } from '../../services/chat-state.service';
 export class HeaderComponent {
   theme = inject(ThemeService);
   chatState = inject(ChatStateService);
+  i18n = inject(TranslationService);
 }
+

@@ -1,6 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ChatStateService } from '../../services/chat-state.service';
+import { TranslationService } from '../../services/translation.service';
 
 @Component({
   selector: 'app-stage-tracker',
@@ -12,7 +13,7 @@ import { ChatStateService } from '../../services/chat-state.service';
         <div class="tracker-header">
           <div class="tracker-title">
             <span class="live-dot"></span>
-            <span>Evidence-Bound Pipeline Execution</span>
+            <span>{{ i18n.t('pipeline_title') }}</span>
           </div>
           <div class="tracker-stage-detail">{{ chatState.stageDetails() }}</div>
         </div>
@@ -25,7 +26,7 @@ import { ChatStateService } from '../../services/chat-state.service';
                 <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
               </svg>
             </div>
-            <div class="step-label">1. Risk Classifier</div>
+            <div class="step-label">{{ i18n.t('step_risk') }}</div>
             <div class="step-indicator"></div>
           </div>
 
@@ -39,7 +40,7 @@ import { ChatStateService } from '../../services/chat-state.service';
                 <path d="m21 21-4.3-4.3"/>
               </svg>
             </div>
-            <div class="step-label">2. Dense Retrieval</div>
+            <div class="step-label">{{ i18n.t('step_retrieval') }}</div>
             <div class="step-indicator"></div>
           </div>
 
@@ -55,7 +56,7 @@ import { ChatStateService } from '../../services/chat-state.service';
                 <line x1="16" y1="17" x2="8" y2="17"/>
               </svg>
             </div>
-            <div class="step-label">3. Grounded LLM</div>
+            <div class="step-label">{{ i18n.t('step_grounded') }}</div>
             <div class="step-indicator"></div>
           </div>
 
@@ -69,7 +70,7 @@ import { ChatStateService } from '../../services/chat-state.service';
                 <polyline points="22 4 12 14.01 9 11.01"/>
               </svg>
             </div>
-            <div class="step-label">4. Fact Gate</div>
+            <div class="step-label">{{ i18n.t('step_validation') }}</div>
             <div class="step-indicator"></div>
           </div>
         </div>
@@ -98,14 +99,16 @@ import { ChatStateService } from '../../services/chat-state.service';
       display: flex;
       align-items: center;
       gap: 0.5rem;
-      font-size: 0.82rem;
+      font-size: 0.8rem;
       font-weight: 700;
-      color: var(--text-primary);
+      color: var(--primary-color);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
     }
 
     .live-dot {
-      width: 8px;
-      height: 8px;
+      width: 7px;
+      height: 7px;
       border-radius: 50%;
       background: var(--primary-color);
       animation: pulse 1.5s infinite;
@@ -114,13 +117,14 @@ import { ChatStateService } from '../../services/chat-state.service';
     .tracker-stage-detail {
       font-size: 0.75rem;
       color: var(--text-muted);
-      font-style: italic;
+      font-weight: 500;
     }
 
     .stages-flow {
       display: flex;
       align-items: center;
       justify-content: space-between;
+      position: relative;
     }
 
     .stage-step {
@@ -129,19 +133,20 @@ import { ChatStateService } from '../../services/chat-state.service';
       align-items: center;
       gap: 0.35rem;
       position: relative;
+      z-index: 2;
     }
 
     .step-icon {
-      width: 32px;
-      height: 32px;
-      border-radius: 8px;
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
       background: var(--bg-surface);
-      border: 1px solid var(--border-subtle);
-      color: var(--text-muted);
+      border: 2px solid var(--border-subtle);
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: all 0.3s ease;
+      color: var(--text-muted);
+      transition: all 0.25s ease;
     }
 
     .step-icon svg {
@@ -150,9 +155,48 @@ import { ChatStateService } from '../../services/chat-state.service';
     }
 
     .step-label {
-      font-size: 0.7rem;
+      font-size: 0.68rem;
       font-weight: 600;
       color: var(--text-muted);
+      white-space: nowrap;
+      transition: color 0.2s ease;
+    }
+
+    .step-indicator {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: transparent;
+      transition: all 0.2s ease;
+    }
+
+    /* Active Step */
+    .stage-step.active .step-icon {
+      background: var(--primary-color);
+      border-color: var(--primary-color);
+      color: white;
+      box-shadow: 0 0 16px rgba(2, 132, 199, 0.4);
+      transform: scale(1.1);
+    }
+
+    .stage-step.active .step-label {
+      color: var(--primary-color);
+      font-weight: 700;
+    }
+
+    .stage-step.active .step-indicator {
+      background: var(--primary-color);
+    }
+
+    /* Completed Step */
+    .stage-step.completed .step-icon {
+      background: var(--medical-teal);
+      border-color: var(--medical-teal);
+      color: white;
+    }
+
+    .stage-step.completed .step-label {
+      color: var(--medical-teal);
     }
 
     .flow-connector {
@@ -160,36 +204,14 @@ import { ChatStateService } from '../../services/chat-state.service';
       height: 2px;
       background: var(--border-subtle);
       margin: 0 0.5rem;
-      margin-bottom: 1.2rem;
+      margin-bottom: 1.25rem;
+      position: relative;
+      z-index: 1;
       transition: background 0.3s ease;
     }
 
     .flow-connector.active {
-      background: var(--primary-color);
-      box-shadow: 0 0 8px rgba(16, 185, 129, 0.4);
-    }
-
-    /* Step States */
-    .stage-step.active .step-icon {
-      background: rgba(16, 185, 129, 0.15);
-      border-color: var(--primary-color);
-      color: var(--primary-color);
-      box-shadow: 0 0 14px rgba(16, 185, 129, 0.35);
-      transform: scale(1.1);
-    }
-
-    .stage-step.active .step-label {
-      color: var(--primary-color);
-    }
-
-    .stage-step.completed .step-icon {
-      background: var(--primary-color);
-      border-color: var(--primary-color);
-      color: white;
-    }
-
-    .stage-step.completed .step-label {
-      color: var(--text-primary);
+      background: var(--medical-teal);
     }
 
     @keyframes fadeIn {
@@ -210,6 +232,7 @@ import { ChatStateService } from '../../services/chat-state.service';
 })
 export class StageTrackerComponent {
   chatState = inject(ChatStateService);
+  i18n = inject(TranslationService);
 
   private stageOrder = ['risk_check', 'retrieval', 'synthesis', 'validation', 'complete'];
 

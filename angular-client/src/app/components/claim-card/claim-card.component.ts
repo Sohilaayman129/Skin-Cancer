@@ -72,7 +72,7 @@ import { ChatStateService } from '../../services/chat-state.service';
       font-size: 0.72rem;
       font-weight: 600;
       color: var(--primary-color);
-      background: rgba(16, 185, 129, 0.1);
+      background: var(--badge-bg);
       padding: 0.2rem 0.5rem;
       border-radius: 6px;
     }
@@ -127,13 +127,14 @@ import { ChatStateService } from '../../services/chat-state.service';
       background: var(--bg-surface);
       padding: 0.1rem 0.35rem;
       border-radius: 4px;
+      border: 1px solid var(--border-subtle);
     }
 
     .verified-tag {
       display: flex;
       align-items: center;
       gap: 0.25rem;
-      color: #10b981;
+      color: var(--medical-teal);
       font-weight: 600;
     }
 

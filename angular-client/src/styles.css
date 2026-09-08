@@ -1,59 +1,65 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap');
 
 :root {
-  /* Light Theme */
-  --bg-canvas: #f8fafc;
+  /* Light Theme — Clean Clinical Hospital / Dermatology Clinic */
+  --bg-canvas: #f0f4f9;
   --bg-surface: #ffffff;
   --bg-surface-elevated: #ffffff;
-  --bg-surface-glass: rgba(255, 255, 255, 0.85);
-  --bg-surface-hover: #f1f5f9;
-  --border-subtle: #e2e8f0;
-  --border-hover: #cbd5e1;
-  --border-highlight: rgba(16, 185, 129, 0.3);
+  --bg-surface-glass: rgba(255, 255, 255, 0.92);
+  --bg-surface-hover: #e8f0fe;
+  --border-subtle: #dbe4f0;
+  --border-hover: #c2d4eb;
+  --border-highlight: rgba(2, 132, 199, 0.35);
 
-  --text-primary: #0f172a;
-  --text-secondary: #475569;
-  --text-muted: #94a3b8;
+  --text-primary: #0c1a30;
+  --text-secondary: #334e68;
+  --text-muted: #627d98;
 
-  --primary-color: #059669;
-  --primary-light: #10b981;
-  --primary-dark: #047857;
-  --accent-cyan: #0891b2;
+  --primary-color: #0284c7; /* Clinical Ocean Blue */
+  --primary-light: #0ea5e9;
+  --primary-dark: #0369a1;
+  --medical-teal: #0d9488;  /* Hospital Surgical Teal */
+  --medical-teal-light: #14b8a6;
+  --accent-cyan: #0284c7;
   --accent-amber: #d97706;
   --accent-rose: #e11d48;
 
-  --badge-bg: #f1f5f9;
-  --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
-  --shadow-md: 0 4px 14px rgba(0,0,0,0.07);
-  --shadow-lg: 0 10px 30px rgba(0,0,0,0.1);
+  --badge-bg: #e0f2fe;
+  --badge-teal-bg: #ccfbf1;
+  --shadow-sm: 0 1px 3px rgba(12, 26, 48, 0.05);
+  --shadow-md: 0 4px 16px rgba(12, 26, 48, 0.08);
+  --shadow-lg: 0 10px 30px rgba(12, 26, 48, 0.12);
 }
 
 .dark {
-  /* High-End Dark Theme */
-  --bg-canvas: #090d16;
-  --bg-surface: #0f172a;
-  --bg-surface-elevated: #151f38;
-  --bg-surface-glass: rgba(15, 23, 42, 0.85);
-  --bg-surface-hover: #1e293b;
-  --border-subtle: #1e293b;
-  --border-hover: #334155;
-  --border-highlight: rgba(16, 185, 129, 0.35);
+  /* High-End Dark Theme — Clinical Monitor & Deep Medical Navy */
+  --bg-canvas: #090e17;
+  --bg-surface: #0f1826;
+  --bg-surface-elevated: #152238;
+  --bg-surface-glass: rgba(15, 24, 38, 0.9);
+  --bg-surface-hover: #1c2c44;
+  --border-subtle: #1a2a40;
+  --border-hover: #294061;
+  --border-highlight: rgba(56, 189, 248, 0.4);
 
-  --text-primary: #f8fafc;
+  --text-primary: #f0f6fc;
   --text-secondary: #cbd5e1;
   --text-muted: #64748b;
 
-  --primary-color: #10b981;
-  --primary-light: #34d399;
-  --primary-dark: #059669;
-  --accent-cyan: #06b6d4;
-  --accent-amber: #f59e0b;
-  --accent-rose: #f43f5e;
+  --primary-color: #38bdf8;
+  --primary-light: #7dd3fc;
+  --primary-dark: #0284c7;
+  --medical-teal: #2dd4bf;
+  --medical-teal-light: #5eead4;
+  --accent-cyan: #38bdf8;
+  --accent-amber: #fbbf24;
+  --accent-rose: #fb7185;
 
-  --badge-bg: #1e293b;
-  --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
-  --shadow-md: 0 4px 14px rgba(0,0,0,0.4);
-  --shadow-lg: 0 10px 30px rgba(0,0,0,0.6);
+  --badge-bg: #152238;
+  --badge-teal-bg: #133534;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.4);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.5);
+  --shadow-lg: 0 10px 30px rgba(0,0,0,0.7);
 }
 
 * {
